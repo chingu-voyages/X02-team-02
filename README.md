@@ -36,6 +36,7 @@ coding!
 
 - Tunde Ademola Kujore: [GitHub](https://github.com/dhemmyhardy) / [LinkedIn](https://www.linkedin.com/in/tundeademolakujore/)
 - Dustin Hoeppner (developer): [GitHub](https://github.com/dhoepp) / [LinkedIn](https://linkedin.com/in/dustin-hoeppner)
+- William Barus (Developer): [GitHub](https://github.com/maki-keep) / [LinkedIn](https://www.linkedin.com/in/william-barus-3821a8234/)
 
    ...
 - Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
