@@ -1,0 +1,22 @@
+{
+  "name": "X02-team-02",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VoyageXP Agile Practice Exam: monorepo with client, server, and shared packages",
+  "scripts": {
+    "dev:client": "pnpm --filter @x02/client dev",
+    "dev:server": "pnpm --filter @x02/server dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "vitest run",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "packageManager": "pnpm@10.30.3",
+  "devDependencies": {
+    "prettier": "^3.9.9",
+    "vitest": "^5.0.3"
+  }
+}

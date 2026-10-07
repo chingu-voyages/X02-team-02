@@ -97,6 +97,9 @@ dist
 # FuseBox cache
 .fusebox/
 
+# macOS
+.DS_Store
+
 # DynamoDB Local files
 .dynamodb/
 
