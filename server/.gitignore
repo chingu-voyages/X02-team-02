@@ -4,3 +4,10 @@ node_modules
 .env
 
 /generated/prisma
+
+# ignore local agent tooling
+
+/.agents/skills/
+/.claude/skills/
+/.windsurf/skills/
+skills-lock.json
