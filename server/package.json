@@ -8,12 +8,17 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "7",
     "@x02/shared": "workspace:*",
-    "express": "^5.2.1"
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.1",
+    "prisma": "7",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   }
