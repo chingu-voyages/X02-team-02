@@ -38,6 +38,4 @@ coding!
 - Dustin Hoeppner (developer): [GitHub](https://github.com/dhoepp) / [LinkedIn](https://linkedin.com/in/dustin-hoeppner)
 - William Barus (Developer): [GitHub](https://github.com/maki-keep) / [LinkedIn](https://www.linkedin.com/in/william-barus-3821a8234/)
 - Adewale Agboke (Scrum Master): [GitHub](https://github.com/Adewal246) / [LinkedIn](https://linkedin.com/in/adewaleagboke/)
-- 
-   ...
-- Teammate name #n: [GitHub](https://github.com/ghaccountname) / [LinkedIn](https://linkedin.com/in/liaccountname)
+- Eva Langerova (Developer): [GitHub](https://github.com/eva-lng) / [LinkedIn](https://www.linkedin.com/in/eva-langerova-61059027a/)

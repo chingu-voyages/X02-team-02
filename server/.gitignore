@@ -1,0 +1,13 @@
+node_modules
+
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# ignore local agent tooling
+
+/.agents/skills/
+/.claude/skills/
+/.windsurf/skills/
+skills-lock.json
