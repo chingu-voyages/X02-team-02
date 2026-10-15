@@ -15,9 +15,9 @@ const port = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
-});
+import healthRouter from "./health/health-routes.js";
+
+app.use("/health", healthRouter);
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Express server listening on port ${port}`);
