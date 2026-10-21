@@ -1,6 +1,8 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerFormSchema, type RegisterInput } from "./schema";
+import type { RegisterRequest } from "@x02/shared";
+import { registerUser } from "./api";
 
 export default function RegisterForm() {
   const {
@@ -12,7 +14,20 @@ export default function RegisterForm() {
     resolver: zodResolver(registerFormSchema),
     mode: "onTouched",
   });
-  const onSubmit: SubmitHandler<RegisterInput> = (data) => console.log(data);
+  const onSubmit: SubmitHandler<RegisterInput> = async (data) => {
+    const request: RegisterRequest = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    };
+
+    try {
+      const result = await registerUser(request);
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate>
