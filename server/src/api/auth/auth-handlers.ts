@@ -8,16 +8,22 @@ export async function register(
 ): Promise<void> {
   const { username, email, password } = req.body ?? {};
 
-  if (
-    typeof username !== "string" ||
-    typeof email !== "string" ||
-    typeof password !== "string" ||
-    !username.trim() ||
-    !email.trim() ||
-    !password
-  ) {
+  const fieldErrors = [];
+
+  if (typeof username !== "string" || !username.trim()) {
+    fieldErrors.push({ field: "username", message: "Username is required." });
+  }
+  if (typeof email !== "string" || !email.trim()) {
+    fieldErrors.push({ field: "email", message: "Email is required." });
+  }
+  if (typeof password !== "string" || !password) {
+    fieldErrors.push({ field: "password", message: "Password is required." });
+  }
+
+  if (fieldErrors.length > 0) {
     res.status(400).json({
-      error: "Username, email, and password are required.",
+      error: "Validation failed.",
+      fieldErrors,
     });
     return;
   }
@@ -38,7 +44,7 @@ export async function register(
         id: true,
         username: true,
         email: true,
-        createdAt: true,
+        role: true,
       },
     });
 
