@@ -28,8 +28,30 @@ export async function register(
     return;
   }
 
-  const normalizedUsername = username.trim();
+  const normalizedUsername = username.trim().normalize("NFC");
+
+  if (normalizedUsername.length > 50) {
+    res.status(400).json({
+      error: "Username must not exceed 50 characters.",
+    });
+    return;
+  }
+
   const normalizedEmail = email.trim().toLowerCase();
+
+  if (normalizedEmail.length > 255) {
+    res.status(400).json({
+      error: "Email must not exceed 255 characters.",
+    });
+    return;
+  }
+
+  if (/\s/.test(normalizedEmail) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    res.status(400).json({
+      error: "Email must be a valid email address.",
+    });
+    return;
+  }
 
   try {
     const passwordHash = await hashPassword(password);
