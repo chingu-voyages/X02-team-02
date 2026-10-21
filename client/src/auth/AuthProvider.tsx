@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import type { User } from "@x02/shared";
-import { getMe } from "../api/auth.ts";
+import type { LoginRequest, User } from "@x02/shared";
+import {
+  getMe,
+  login as loginRequest,
+  logout as logoutRequest,
+} from "../api/auth.ts";
 import { AuthContext } from "./auth-context.ts";
 import type { AuthStatus } from "./auth-context.ts";
 
@@ -23,8 +27,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
+  // Errors are not caught here, so the login form can show them.
+  async function login(body: LoginRequest) {
+    const response = await loginRequest(body);
+    setUser(response.user);
+    setStatus("authenticated");
+  }
+
+  // Only clear the local state once the server has confirmed the logout.
+  async function logout() {
+    await logoutRequest();
+    setUser(null);
+    setStatus("anonymous");
+  }
+
   return (
-    <AuthContext.Provider value={{ user, status }}>
+    <AuthContext.Provider value={{ user, status, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
