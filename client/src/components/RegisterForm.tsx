@@ -3,6 +3,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerFormSchema, type RegisterInput } from "../auth/schemas.ts";
 import type { RegisterRequest } from "@x02/shared";
 import { register as registerUser } from "../api/auth.ts";
+import { ApiError } from "../api/client.ts";
+
+const SERVER_FIELDS = ["username", "email", "password"];
+type ServerField = "username" | "email" | "password";
+
+function isServerField(name: string): name is ServerField {
+  return SERVER_FIELDS.includes(name);
+}
 
 export default function RegisterForm() {
   const {
@@ -23,9 +31,41 @@ export default function RegisterForm() {
 
     try {
       const result = await registerUser(request);
+      // TODO(#38): navigate after registration
       console.log(result);
     } catch (error) {
       console.error(error);
+
+      if (error instanceof ApiError) {
+        // input field error
+        if (error.fieldErrors.length > 0) {
+          let hasHandledFieldError = false;
+          for (const { field, message } of error.fieldErrors) {
+            if (isServerField(field)) {
+              setError(
+                field,
+                { type: "server", message },
+                { shouldFocus: !hasHandledFieldError },
+              );
+              hasHandledFieldError = true;
+            }
+          }
+          if (hasHandledFieldError) return;
+        }
+
+        // form-level error
+        setError("root.server", {
+          type: String(error.status),
+          message: error.message,
+        });
+
+        return;
+      }
+
+      setError("root.server", {
+        type: "network",
+        message: "Couldn't reach the server. Please try again.",
+      });
     }
   };
 
@@ -79,7 +119,7 @@ export default function RegisterForm() {
       <div>
         <label htmlFor="confirmPassword">Confirm password</label>
         <input
-          type="confirmPassword"
+          type="Password"
           id="confirmPassword"
           {...register("confirmPassword")}
           aria-invalid={!!errors.confirmPassword}
@@ -91,6 +131,8 @@ export default function RegisterForm() {
           </p>
         )}
       </div>
+
+      {errors.root?.server && <p role="alert">{errors.root.server.message}</p>}
 
       <button type="submit" disabled={isSubmitting}>
         Register
