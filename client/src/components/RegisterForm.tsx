@@ -31,11 +31,9 @@ export default function RegisterForm() {
 
     try {
       const result = await registerUser(request);
-      // TODO(#38): navigate after registration
+      // TODO: navigate after registration
       console.log(result);
     } catch (error) {
-      console.error(error);
-
       if (error instanceof ApiError) {
         // input field error
         if (error.fieldErrors.length > 0) {
