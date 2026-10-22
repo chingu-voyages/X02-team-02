@@ -1,8 +1,8 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerFormSchema, type RegisterInput } from "./schema";
+import { registerFormSchema, type RegisterInput } from "../auth/schemas.ts";
 import type { RegisterRequest } from "@x02/shared";
-import { registerUser } from "./api";
+import { register as registerUser } from "../api/auth.ts";
 
 export default function RegisterForm() {
   const {
