@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { registerFormSchema } from "./schemas";
+import { registerFormSchema } from "./schemas.ts";
 
 const validRegisterInput = {
   username: "  testname ",

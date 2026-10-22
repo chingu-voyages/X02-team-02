@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import RegisterForm from "../components/RegisterForm";
+import RegisterForm from "../components/RegisterForm.tsx";
 
 export default function RegisterPage() {
   return (
