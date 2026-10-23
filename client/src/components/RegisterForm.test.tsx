@@ -56,6 +56,13 @@ describe("RegisterForm", () => {
       password: "Password1!",
     });
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Account added.",
+    );
+    expect(screen.getByLabelText("Username")).toHaveValue("");
+    expect(screen.getByLabelText("Email")).toHaveValue("");
+    expect(screen.getByLabelText("Password", { exact: true })).toHaveValue("");
+    expect(screen.getByLabelText("Confirm password")).toHaveValue("");
   });
 
   it("displays an error when email already exists", async () => {
@@ -78,6 +85,7 @@ describe("RegisterForm", () => {
       "An account with this email already exists.",
     );
     expect(mockRegister).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 
   it("displays an error when passwords don't match", async () => {

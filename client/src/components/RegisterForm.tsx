@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerFormSchema, type RegisterInput } from "../auth/schemas.ts";
@@ -13,9 +14,11 @@ function isServerField(name: string): name is ServerField {
 }
 
 export default function RegisterForm() {
+  const [accountAdded, setAccountAdded] = useState(false);
   const {
     register,
     handleSubmit,
+    reset,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegisterInput>({
@@ -23,6 +26,8 @@ export default function RegisterForm() {
     mode: "onTouched",
   });
   const onSubmit: SubmitHandler<RegisterInput> = async (data) => {
+    setAccountAdded(false);
+
     const request: RegisterRequest = {
       username: data.username,
       email: data.email,
@@ -30,9 +35,9 @@ export default function RegisterForm() {
     };
 
     try {
-      const result = await registerUser(request);
-      // TODO: navigate after registration
-      console.log(result);
+      await registerUser(request);
+      reset();
+      setAccountAdded(true);
     } catch (error) {
       if (error instanceof ApiError) {
         // input field error
@@ -131,6 +136,8 @@ export default function RegisterForm() {
       </div>
 
       {errors.root?.server && <p role="alert">{errors.root.server.message}</p>}
+
+      {accountAdded && <p role="status">Account added.</p>}
 
       <button type="submit" disabled={isSubmitting}>
         Register

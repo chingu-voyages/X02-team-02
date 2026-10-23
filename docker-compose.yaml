@@ -44,6 +44,8 @@ services:
       context: .
       dockerfile: client/Dockerfile
     restart: unless-stopped
+    environment:
+      API_PROXY_TARGET: http://server:3000
     ports:
       - "5173:5173"
     depends_on:
