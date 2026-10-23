@@ -13,11 +13,13 @@
     "@prisma/client": "^7.10.0",
     "@x02/shared": "workspace:*",
     "argon2": "^0.45.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "pg": "^8.23.1"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.1",
     "@types/supertest": "^7.2.1",
