@@ -2,6 +2,41 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  /* Neutrals */
+  --color-page: #ffffff; /* main background */
+  --color-surface: #f9fafb; /* subtle grey background (cards, table rows, header) */
+  --color-line: #e5e7eb; /* default border */
+  --color-line-strong: #d1d5db; /* inputs, emphasized borders */
+  --color-fg: #111827; /* main text */
+  --color-fg-muted: #4b5563; /* secondary text */
+  --color-fg-subtle: #6b7280; /* hints, placeholders */
+
+  /* Accent (blue): primary buttons, selected option, progress bar, links */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-soft: #eff6ff;
+  --color-accent-line: #bfdbfe;
+  --color-accent-fg: #1d4ed8;
+
+  /* Status: approved, correct */
+  --color-success-soft: #f0fdf4;
+  --color-success-line: #bbf7d0;
+  --color-success-fg: #166534;
+
+  /* Status: pending, flagged-lite */
+  --color-warning-soft: #fffbeb;
+  --color-warning-line: #fde68a;
+  --color-warning-fg: #92400e;
+
+  /* Status: rejected, wrong, block/delete */
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+  --color-danger-soft: #fef2f2;
+  --color-danger-line: #fecaca;
+  --color-danger-fg: #991b1b;
+}
+
 /* :root {
   --text: #6b6375;
   --text-h: #08060d;
