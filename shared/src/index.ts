@@ -48,3 +48,13 @@ export type FieldError = {
 export type ValidationErrorResponse = ErrorResponse & {
   fieldErrors: FieldError[];
 };
+
+export {
+  createQuestionSchema,
+  questionAnswerKeySchema,
+  questionContentSchema,
+} from "./schemas/question.js";
+
+export type {
+  CreateQuestionInput,
+} from "./schemas/question.js";
