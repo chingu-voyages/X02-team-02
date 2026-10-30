@@ -1,7 +1,7 @@
 export type QuestionReviewStatus =
   "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
 
-// If the API response looks different getQuestions() can map it onto this shape.
+// If the API response looks different getQuestions() can map it onto this shape or FE can be changed to match the API response.
 export type QuestionListItem = {
   id: string;
   text: string;
