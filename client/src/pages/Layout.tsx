@@ -11,7 +11,7 @@ const adminLinks = [
 export default function Layout() {
   return (
     <div className="flex flex-col h-dvh">
-      <header className="lg:mb-4 border border-gray-400">
+      <header className="lg:mb-4 border-b border-line">
         <div className="container mx-auto flex justify-between items-center p-2">
           <Link to="/">
             <h1>Logo</h1>
@@ -26,7 +26,7 @@ export default function Layout() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-[750px] p-5 border border-blue-300">
+      <main className="mx-auto w-full max-w-5xl p-5">
         <Outlet />
       </main>
     </div>
