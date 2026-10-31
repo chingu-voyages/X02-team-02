@@ -4,7 +4,7 @@ import RegisterForm from "../components/RegisterForm.tsx";
 export default function RegisterPage() {
   return (
     <main className="register-page">
-      <h1>Register</h1>
+      <h2>Register</h2>
       <RegisterForm />
       <p>Register page coming soon.</p>
       <p>
