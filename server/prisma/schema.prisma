@@ -59,11 +59,20 @@ model Session {
   @@map("sessions")
 }
 
+enum QuestionAnswerType {
+  MULTIPLE_CHOICE
+  SHORT_ANSWER
+  ESSAY
+
+  @@map("question_answer_type")
+}
+
 enum QuestionReviewStatus {
   DRAFT
   PENDING
   APPROVED
   REJECTED
+  FLAGGED
 
   @@map("question_review_status")
 }
@@ -75,13 +84,16 @@ model Question {
 
   content              Json                 @db.JsonB
   answerKey            Json                 @map("answer_key") @db.JsonB
+  answerType           QuestionAnswerType   @map("answer_type")
 
-  category             String?              @db.VarChar(100)
+  category             String               @db.VarChar(100)
   difficulty           String?              @db.VarChar(50)
 
   reviewStatus         QuestionReviewStatus @default(DRAFT) @map("review_status")
   reviewedAt           DateTime?            @map("reviewed_at")
   reviewedById         String?              @map("reviewed_by_id") @db.Uuid
+  flaggedAt            DateTime?            @map("flagged_at")
+  flaggedReason        String?              @map("flagged_reason")
 
   authorId             String               @map("author_id") @db.Uuid
   author               User                 @relation("QuestionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
