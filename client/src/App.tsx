@@ -5,6 +5,7 @@ import HomePage from "./pages/HomePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import { AuthProvider } from "./auth/AuthProvider.tsx";
+import NewQuestionPage from "./pages/NewQuestionPage.tsx";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
 
           <Route path="/admin" element={<Layout />}>
             <Route path="questions" element={<AdminQuestionsPage />} />
+            <Route path="questions/new" element={<NewQuestionPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
