@@ -51,8 +51,6 @@ export type ValidationErrorResponse = ErrorResponse & {
 
 export {
   createQuestionSchema,
-  questionAnswerKeySchema,
-  questionContentSchema,
 } from "./schemas/question.js";
 
 export type {
