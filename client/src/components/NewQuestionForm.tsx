@@ -17,6 +17,24 @@ export default function NewQuestionForm() {
     newOption(),
   ]);
 
+  function updateOption(id: string, changes: Partial<OptionDraft>) {
+    setOptions((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, ...changes } : o)),
+    );
+  }
+
+  function addOption() {
+    setOptions((prev) =>
+      prev.length < MAX_OPTIONS ? [...prev, newOption()] : prev,
+    );
+  }
+
+  function removeOption(id: string) {
+    setOptions((prev) =>
+      prev.length > MIN_OPTIONS ? prev.filter((o) => o.id !== id) : prev,
+    );
+  }
+
   return (
     <form className="max-w-xl space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
@@ -60,11 +78,73 @@ export default function NewQuestionForm() {
         ></textarea>
       </div>
 
-      <div>
-        <label htmlFor=""></label>
-      </div>
+      {answerType === "multipleChoice" ? (
+        <fieldset className="space-y-2">
+          <legend className="label">
+            Answer options (tick the correct ones)
+          </legend>
 
-      <div>
+          {options.map((option, index) => {
+            const letter = String.fromCharCode(65 + index);
+            return (
+              <div key={option.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  aria-label={`Option ${letter} is correct`}
+                  checked={option.isCorrect}
+                  onChange={(e) =>
+                    updateOption(option.id, { isCorrect: e.target.checked })
+                  }
+                  className="size-5 shrink-0 focus-ring"
+                />
+                <input
+                  type="text"
+                  aria-label={`Option ${letter} text`}
+                  placeholder={`Option ${letter}`}
+                  value={option.text}
+                  onChange={(e) =>
+                    updateOption(option.id, { text: e.target.value })
+                  }
+                  className="field focus-ring"
+                />
+                <button
+                  type="button"
+                  aria-label={`Remove option ${letter}`}
+                  disabled={options.length <= MIN_OPTIONS}
+                  onClick={() => removeOption(option.id)}
+                  className="rounded-md border border-line-strong bg-page px-3 py-2 text-fg hover:bg-surface disabled:opacity-40 focus-ring"
+                >
+                  x
+                </button>
+              </div>
+            );
+          })}
+
+          <button
+            type="button"
+            disabled={options.length >= MAX_OPTIONS}
+            onClick={addOption}
+            className="text-sm font-medium text-accent-fg hover:underline disabled:opacity-40 focus-ring"
+          >
+            + Add option
+          </button>
+        </fieldset>
+      ) : (
+        <div>
+          <label htmlFor="modelAnswer" className="label">
+            Model answer
+          </label>
+          <textarea
+            name="modelAnswer"
+            id="modelAnswer"
+            rows={3}
+            placeholder="What would a correct answer look like?"
+            className="field focus-ring"
+          ></textarea>
+        </div>
+      )}
+
+      <div className="flex gap-3">
         <button
           type="submit"
           className="rounded-md border border-accent-line bg-accent-soft px-4 py-2 font-medium text-accent-fg hover:bg-accent-line/50 focus-ring"
@@ -73,6 +153,7 @@ export default function NewQuestionForm() {
         </button>
         <button
           type="button"
+          // TODO - navigate back to hthe question list
           className="rounded-md border px-4 py-2 font-medium border-line-strong bg-page text-fg hover:bg-surface focus-ring"
         >
           Cancel

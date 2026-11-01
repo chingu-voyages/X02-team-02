@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerFormSchema, type RegisterInput } from "../auth/schemas.ts";
+import {
+  registerFormSchema,
+  type RegisterInput,
+} from "../schemas/authSchema.ts";
 import type { RegisterRequest } from "@x02/shared";
 import { register as registerUser } from "../api/auth.ts";
 import { ApiError } from "../api/client.ts";
