@@ -1,0 +1,69 @@
+name: Discord Pull Request Notifications
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  notify-discord:
+    name: Notify Discord
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Send pull request notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if [ -z "$DISCORD_WEBHOOK_URL" ]; then
+            echo "::error::DISCORD_WEBHOOK_URL repository secret is not configured."
+            exit 1
+          fi
+
+          payload="$(jq -n \
+            --arg repository "$REPOSITORY" \
+            --arg number "$PR_NUMBER" \
+            --arg title "$PR_TITLE" \
+            --arg url "$PR_URL" \
+            --arg author "$PR_AUTHOR" \
+            --arg base "$PR_BASE" \
+            --arg head "$PR_HEAD" \
+            --arg body "$PR_BODY" \
+            '{
+              username: "GitHub",
+              embeds: [{
+                title: ("New pull request: " + $title),
+                url: $url,
+                description: (
+                  if ($body | length) > 3500
+                  then $body[:3497] + "..."
+                  else $body
+                  end
+                ),
+                color: 5814783,
+                fields: [
+                  {name: "Repository", value: $repository, inline: true},
+                  {name: "PR", value: ("#" + $number), inline: true},
+                  {name: "Author", value: ("@" + $author), inline: true},
+                  {name: "Base branch", value: $base, inline: true},
+                  {name: "Head branch", value: $head, inline: true}
+                ],
+                footer: {text: "A new pull request was opened"}
+              }],
+              allowed_mentions: {parse: []}
+            }')"
+
+          curl --fail --silent --show-error \
+            --retry 2 --retry-delay 2 \
+            -H "Content-Type: application/json" \
+            -d "$payload" \
+            "$DISCORD_WEBHOOK_URL"
