@@ -1,159 +1,262 @@
-import { useState } from "react";
+import {
+  useForm,
+  useWatch,
+  useFieldArray,
+  type SubmitHandler,
+  type FieldErrors,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  questionFormSchema,
+  type QuestionFormValues,
+} from "../schemas/questionSchema";
 
-type AnswerType = "multipleChoice" | "shortAnswer";
-type OptionDraft = { id: string; text: string; isCorrect: boolean };
+type MultipleChoiceValues = Extract<
+  QuestionFormValues,
+  { answerType: "multipleChoice" }
+>;
+type ShortAnswerValues = Extract<
+  QuestionFormValues,
+  { answerType: "shortAnswer" }
+>;
 
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 4;
 
-function newOption(): OptionDraft {
-  return { id: crypto.randomUUID(), text: "", isCorrect: false };
-}
-
 export default function NewQuestionForm() {
-  const [answerType, setAnswerType] = useState<AnswerType>("multipleChoice");
-  const [options, setOptions] = useState<OptionDraft[]>([
-    newOption(),
-    newOption(),
-  ]);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<QuestionFormValues>({
+    resolver: zodResolver(questionFormSchema),
+    mode: "onTouched",
+    defaultValues: {
+      category: "",
+      answerType: "multipleChoice",
+      questionText: "",
+      options: [
+        { text: "", isCorrect: false },
+        { text: "", isCorrect: false },
+      ],
+    },
+  });
+  const optionErrors = (errors as FieldErrors<MultipleChoiceValues>).options;
+  const modelAnswerError = (errors as FieldErrors<ShortAnswerValues>)
+    .modelAnswer;
 
-  function updateOption(id: string, changes: Partial<OptionDraft>) {
-    setOptions((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, ...changes } : o)),
-    );
-  }
+  const answerType = useWatch({ control, name: "answerType" });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "options",
+  });
+  const onSubmit: SubmitHandler<QuestionFormValues> = (data) =>
+    console.log(data);
 
-  function addOption() {
-    setOptions((prev) =>
-      prev.length < MAX_OPTIONS ? [...prev, newOption()] : prev,
-    );
-  }
-
-  function removeOption(id: string) {
-    setOptions((prev) =>
-      prev.length > MIN_OPTIONS ? prev.filter((o) => o.id !== id) : prev,
-    );
+  function onCancel() {
+    reset();
+    // TODO - navigate back /questions
   }
 
   return (
-    <form className="max-w-xl space-y-5">
+    <form
+      onSubmit={handleSubmit(onSubmit, (errs) => console.log(errs))}
+      className="max-w-xl space-y-5"
+      noValidate
+    >
+      {/* Category and Answer inputs */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="category" className="label">
             Category
           </label>
-          <select name="category" id="category" className="field focus-ring">
+
+          <select
+            id="category"
+            {...register("category")}
+            aria-invalid={!!errors.category}
+            aria-describedby="category-error"
+            className="field focus-ring"
+          >
             <option value="">Select a category</option>
             <option value="PSM">PSM</option>
             <option value="PSPO">PSPO</option>
           </select>
+
+          {errors?.category && (
+            <p
+              id="category-error"
+              role="alert"
+              className="mt-1 text-sm text-red-600"
+            >
+              {errors.category.message}
+            </p>
+          )}
         </div>
+
         <div>
           <label htmlFor="answerType" className="label">
             Answer type
           </label>
+
           <select
-            name="answerType"
             id="answerType"
+            {...register("answerType")}
+            aria-invalid={!!errors.answerType}
+            aria-describedby="answerType-error"
             className="field focus-ring"
-            value={answerType}
-            onChange={(e) => setAnswerType(e.target.value as AnswerType)}
           >
             <option value="multipleChoice">Multiple choice</option>
             <option value="shortAnswer">Short answer</option>
           </select>
+
+          {errors?.answerType && (
+            <p
+              id="answerType-error"
+              role="alert"
+              className="mt-1 text-sm text-red-600"
+            >
+              {errors.answerType.message}
+            </p>
+          )}
         </div>
       </div>
 
+      {/* Question text input */}
       <div>
         <label htmlFor="questionText" className="label">
           Question text
         </label>
+
         <textarea
-          name="questionText"
           id="questionText"
+          {...register("questionText")}
+          aria-invalid={!!errors.questionText}
+          aria-describedby="questionText-error"
           rows={5}
           placeholder="Write your question here..."
           className="field focus-ring"
         ></textarea>
+
+        {errors?.questionText && (
+          <p
+            id="questionText-error"
+            role="alert"
+            className="mt-1 text-sm text-red-600"
+          >
+            {errors.questionText.message}
+          </p>
+        )}
       </div>
 
+      {/* Multiple choice fields */}
       {answerType === "multipleChoice" ? (
         <fieldset className="space-y-2">
           <legend className="label">
             Answer options (tick the correct ones)
           </legend>
 
-          {options.map((option, index) => {
+          {fields.map((field, index) => {
             const letter = String.fromCharCode(65 + index);
+
             return (
-              <div key={option.id} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  aria-label={`Option ${letter} is correct`}
-                  checked={option.isCorrect}
-                  onChange={(e) =>
-                    updateOption(option.id, { isCorrect: e.target.checked })
-                  }
-                  className="size-5 shrink-0 focus-ring"
-                />
-                <input
-                  type="text"
-                  aria-label={`Option ${letter} text`}
-                  placeholder={`Option ${letter}`}
-                  value={option.text}
-                  onChange={(e) =>
-                    updateOption(option.id, { text: e.target.value })
-                  }
-                  className="field focus-ring"
-                />
-                <button
-                  type="button"
-                  aria-label={`Remove option ${letter}`}
-                  disabled={options.length <= MIN_OPTIONS}
-                  onClick={() => removeOption(option.id)}
-                  className="rounded-md border border-line-strong bg-page px-3 py-2 text-fg hover:bg-surface disabled:opacity-40 focus-ring"
-                >
-                  x
-                </button>
+              <div key={field.id}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    {...register(`options.${index}.isCorrect`)}
+                    aria-label={`Option ${letter} is correct`}
+                    className="size-5 shrink-0 focus-ring"
+                  />
+                  <input
+                    type="text"
+                    {...register(`options.${index}.text`)}
+                    aria-label={`Option ${letter} text`}
+                    aria-invalid={!!optionErrors?.[index]?.text}
+                    placeholder={`Option ${letter}`}
+                    className="field focus-ring"
+                  />
+                  <button
+                    type="button"
+                    aria-label={`Remove option ${letter}`}
+                    disabled={fields.length <= MIN_OPTIONS}
+                    onClick={() => remove(index)}
+                    className="rounded-md border border-line-strong bg-page px-3 py-2 text-fg hover:bg-surface disabled:opacity-40 focus-ring"
+                  >
+                    x
+                  </button>
+                </div>
+
+                {optionErrors?.[index]?.text && (
+                  <p role="alert" className="text-sm text-red-600">
+                    {optionErrors[index].text.message}
+                  </p>
+                )}
               </div>
             );
           })}
 
+          {/* Array-level errors */}
+          {optionErrors?.root && (
+            <p role="alert" className="text-sm text-red-600">
+              {optionErrors.root.message}
+            </p>
+          )}
+
+          {/* Add option */}
           <button
             type="button"
-            disabled={options.length >= MAX_OPTIONS}
-            onClick={addOption}
+            disabled={fields.length >= MAX_OPTIONS}
+            onClick={() => append({ text: "", isCorrect: false })}
             className="text-sm font-medium text-accent-fg hover:underline disabled:opacity-40 focus-ring"
           >
             + Add option
           </button>
         </fieldset>
       ) : (
+        // Short answer fields
         <div>
           <label htmlFor="modelAnswer" className="label">
             Model answer
           </label>
+
           <textarea
-            name="modelAnswer"
             id="modelAnswer"
+            {...register("modelAnswer")}
+            aria-invalid={!!modelAnswerError}
+            aria-describedby="modelAnswer-error"
             rows={3}
             placeholder="What would a correct answer look like?"
             className="field focus-ring"
-          ></textarea>
+          />
+
+          {modelAnswerError && (
+            <p
+              id="modelAnswer-error"
+              role="alert"
+              className="mt-1 text-sm text-red-600"
+            >
+              {modelAnswerError.message}
+            </p>
+          )}
         </div>
       )}
 
+      {/* Form actions */}
       <div className="flex gap-3">
         <button
           type="submit"
+          disabled={isSubmitting}
           className="rounded-md border border-accent-line bg-accent-soft px-4 py-2 font-medium text-accent-fg hover:bg-accent-line/50 focus-ring"
         >
           Submit question
         </button>
         <button
           type="button"
-          // TODO - navigate back to hthe question list
+          onClick={onCancel}
           className="rounded-md border px-4 py-2 font-medium border-line-strong bg-page text-fg hover:bg-surface focus-ring"
         >
           Cancel
