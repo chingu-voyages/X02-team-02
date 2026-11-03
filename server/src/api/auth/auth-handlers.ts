@@ -1,6 +1,80 @@
 import type { Request, Response } from "express";
-import { hashPassword } from "./password.js";
+import { hashPassword, verifyPassword } from "./password.js";
 import { prisma } from "../../db/prisma.js";
+import { createSession } from "./session.js";
+import { setSessionCookie } from "./session-cookie.js";
+
+const INVALID_CREDENTIALS = {
+  error: "Invalid email or password",
+};
+
+export async function login(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const { email, password } = req.body ?? {};
+
+  if (
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof password !== "string" ||
+    !password
+  ) {
+    res.status(400).json({
+      error: "Email and password are required.",
+    });
+    return;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!user) {
+      res.status(401).json(INVALID_CREDENTIALS);
+      return;
+    }
+
+    const passwordIsValid = await verifyPassword(
+      user.passwordHash,
+      password,
+    );
+
+    if (!passwordIsValid) {
+      res.status(401).json(INVALID_CREDENTIALS);
+      return;
+    }
+
+    const session = await createSession(user.id);
+
+    setSessionCookie(res, session);
+
+    res.status(200).json({
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error: unknown) {
+    console.error("Login failed:", error);
+
+    res.status(500).json({
+      error: "Unable to log in.",
+    });
+  }
+}
 
 export async function register(
   req: Request,
@@ -46,7 +120,10 @@ export async function register(
     return;
   }
 
-  if (/\s/.test(normalizedEmail) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+  if (
+    /\s/.test(normalizedEmail) ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+  ) {
     res.status(400).json({
       error: "Email must be a valid email address.",
     });
@@ -71,7 +148,6 @@ export async function register(
     });
 
     res.status(201).json({ user });
-
   } catch (error: unknown) {
     if (
       typeof error === "object" &&
