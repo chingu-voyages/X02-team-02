@@ -77,3 +77,100 @@ export async function createQuestion(
     });
   }
 }
+
+export async function loadQuestions(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const DEFAULT_PAGE = 1;
+  const DEFAULT_LIMIT = 20;
+  const MAX_LIMIT = 100;
+
+  const parseQueryNumber = (
+    value: unknown,
+    defaultValue: number,
+  ): number | null => {
+    if (value === undefined) {
+      return defaultValue;
+    }
+
+    if (typeof value !== "string" || value.trim() === "") {
+      return null;
+    }
+
+    const parsed = Number(value);
+
+    return Number.isSafeInteger(parsed) && parsed > 0
+      ? parsed
+      : null;
+  };
+
+  const page = parseQueryNumber(req.query?.page, DEFAULT_PAGE);
+  const limit = parseQueryNumber(req.query?.limit, DEFAULT_LIMIT);
+
+  if (page === null || limit === null || limit > MAX_LIMIT) {
+    res.status(400).json({
+      error: "Invalid pagination parameters.",
+      fieldErrors: [
+        ...(page === null
+          ? [{ field: "page", message: "Page must be a positive integer." }]
+          : []),
+        ...(limit === null || limit > MAX_LIMIT
+          ? [{
+              field: "limit",
+              message: `Limit must be a positive integer no greater than ${MAX_LIMIT}.`,
+            }]
+          : []),
+      ],
+    });
+    return;
+  }
+
+  const skip = (page - 1) * limit;
+
+  try {
+    const [questions, total] = await Promise.all([
+      prisma.question.findMany({
+        where: {
+          reviewStatus: "APPROVED",
+        },
+        orderBy: [
+          { createdAt: "desc" },
+          { id: "asc" },
+        ],
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          answerType: true,
+          content: true,
+          category: true,
+          difficulty: true,
+        },
+      }),
+      prisma.question.count({
+        where: {
+          reviewStatus: "APPROVED",
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      questions,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Failed to load questions:", error);
+
+    res.status(500).json({
+      message: "An error occurred while loading questions.",
+    });
+  }
+}

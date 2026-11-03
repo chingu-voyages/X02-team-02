@@ -1,15 +1,19 @@
 import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createQuestion } from "./question-handlers.js";
+import { createQuestion, loadQuestions } from "./question-handlers.js";
 
-const { mockCreate } = vi.hoisted(() => ({
+const { mockCreate, mockFindMany, mockCount } = vi.hoisted(() => ({
   mockCreate: vi.fn(),
+  mockFindMany: vi.fn(),
+  mockCount: vi.fn(),
 }));
 
 vi.mock("../../db/prisma.js", () => ({
   prisma: {
     question: {
       create: mockCreate,
+      findMany: mockFindMany,
+      count: mockCount,
     },
   },
 }));
@@ -182,6 +186,150 @@ describe("Question handlers", () => {
       });
       expect(mockCreate).toHaveBeenCalledTimes(1);
 
+      consoleError.mockRestore();
+    });
+  });
+
+  describe("loadQuestions", () => {
+    it("returns approved questions with default pagination", async () => {
+      const questions = [
+        {
+          id: "00000000-0000-0000-0000-000000000003",
+          answerType: "SHORT_ANSWER",
+          content: validQuestion.content,
+          category: validQuestion.category,
+          difficulty: validQuestion.difficulty,
+        },
+      ];
+  
+      mockFindMany.mockResolvedValue(questions);
+      mockCount.mockResolvedValue(1);
+  
+      const { req, res } = createMocks();
+  
+      await loadQuestions(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        questions,
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 1,
+          totalPages: 1,
+        },
+      });
+  
+      expect(mockFindMany).toHaveBeenCalledWith({
+        where: { reviewStatus: "APPROVED" },
+        orderBy: [
+          { createdAt: "desc" },
+          { id: "asc" },
+        ],
+        skip: 0,
+        take: 20,
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          answerType: true,
+          content: true,
+          category: true,
+          difficulty: true,
+        },
+      });
+  
+      expect(mockCount).toHaveBeenCalledWith({
+        where: { reviewStatus: "APPROVED" },
+      });
+  
+      expect(questions[0]).not.toHaveProperty("answerKey");
+    });
+  
+    it("uses the requested pagination parameters", async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(45);
+  
+      const { req, res } = createMocks();
+  
+      req.query = {
+        page: "2",
+        limit: "10",
+      };
+  
+      await loadQuestions(req, res);
+  
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 10,
+          take: 10,
+        }),
+      );
+  
+      expect(res.json).toHaveBeenCalledWith({
+        questions: [],
+        pagination: {
+          page: 2,
+          limit: 10,
+          total: 45,
+          totalPages: 5,
+        },
+      });
+    });
+  
+    it("returns 400 for invalid pagination parameters", async () => {
+      const { req, res } = createMocks();
+  
+      req.query = {
+        page: "0",
+        limit: "101",
+      };
+  
+      await loadQuestions(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(mockFindMany).not.toHaveBeenCalled();
+      expect(mockCount).not.toHaveBeenCalled();
+    });
+  
+    it("returns 200 with an empty result when no questions are approved", async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(0);
+  
+      const { req, res } = createMocks();
+  
+      await loadQuestions(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        questions: [],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+    });
+  
+    it("returns 500 when the database query fails", async () => {
+      mockFindMany.mockRejectedValue(
+        new Error("Database connection failed"),
+      );
+  
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+  
+      const { req, res } = createMocks();
+  
+      await loadQuestions(req, res);
+  
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "An error occurred while loading questions.",
+      });
+  
       consoleError.mockRestore();
     });
   });
