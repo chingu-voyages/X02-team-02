@@ -127,13 +127,26 @@ describe("Auth routes", () => {
     });
 
     it("returns 500 when an unexpected database error occurs", async () => {
-      mockCreate.mockRejectedValue(new Error("Database connection failed"));
-
-      const response = await request(app)
-        .post("/api/auth/register")
-        .send(validUser);
-
-      expect(response.status).toBe(500);
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+    
+      mockCreate.mockRejectedValueOnce(
+        new Error("Database connection failed"),
+      );
+    
+      try {
+        const response = await request(app)
+          .post("/api/auth/register")
+          .send(validUser);
+    
+        expect(response.status).toBe(500);
+        expect(response.body).toEqual({
+          error: "Unable to register account.",
+        });
+      } finally {
+        consoleError.mockRestore();
+      }
     });
   });
 
