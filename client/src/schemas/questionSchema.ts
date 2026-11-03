@@ -11,18 +11,18 @@ const optionSchema = z.object({
 });
 
 const multipleChoiceSchema = basefields.extend({
-  answerType: z.literal("multipleChoice"),
+  answerType: z.literal("MULTIPLE_CHOICE"),
   options: z
     .array(optionSchema)
     .min(2, "Add at least 2 answer options")
-    .max(4, "At most 4 answer options")
+    .max(4, "At most 10 answer options")
     .refine((opts) => opts.some((o) => o.isCorrect), {
       message: "Tick at least one correct option",
     }),
 });
 
 const shortAnswerSchema = basefields.extend({
-  answerType: z.literal("shortAnswer"),
+  answerType: z.literal("SHORT_ANSWER"),
   modelAnswer: z.string().trim().min(1, "Provide a model answer"),
 });
 

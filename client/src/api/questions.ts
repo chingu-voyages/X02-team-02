@@ -1,5 +1,32 @@
+import { apiFetch } from "./client.ts";
+import { type CreateQuestionInput } from "@x02/shared";
+
 export type QuestionReviewStatus =
-  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
+
+type CreatedQuestion = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  answerType: "MULTIPLE_CHOICE" | "SHORT_ANSWER" | "ESSAY";
+  content: unknown;
+  category: string;
+  difficulty: string | null;
+  reviewStatus: QuestionReviewStatus;
+  authorId: string;
+};
+
+type CreateQuestionResponse = {
+  message: string;
+  question: CreatedQuestion;
+};
+
+export const createQuestion = (body: CreateQuestionInput) => {
+  return apiFetch<CreateQuestionResponse>("/questions/create", {
+    method: "POST",
+    body,
+  });
+};
 
 // If the API response looks different getQuestions() can map it onto this shape or FE can be changed to match the API response.
 export type QuestionListItem = {

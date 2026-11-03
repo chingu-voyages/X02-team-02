@@ -4,39 +4,47 @@ import {
   useFieldArray,
   type SubmitHandler,
   type FieldErrors,
+  type FieldPath,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   questionFormSchema,
   type QuestionFormValues,
-} from "../schemas/questionSchema";
+} from "../schemas/questionSchema.ts";
+import { type CreateQuestionInput } from "@x02/shared";
+import { createQuestion } from "../api/questions.ts";
+import {
+  toCreateQuestionPayload,
+  toFormFieldName,
+} from "../api/questionMapper.ts";
+import { ApiError } from "../api/client.ts";
 
 type MultipleChoiceValues = Extract<
   QuestionFormValues,
-  { answerType: "multipleChoice" }
+  { answerType: "MULTIPLE_CHOICE" }
 >;
 type ShortAnswerValues = Extract<
   QuestionFormValues,
-  { answerType: "shortAnswer" }
+  { answerType: "SHORT_ANSWER" }
 >;
 
 const MIN_OPTIONS = 2;
-const MAX_OPTIONS = 4;
+const MAX_OPTIONS = 10;
 
 export default function NewQuestionForm() {
   const {
     register,
     handleSubmit,
     reset,
-    setError,
     control,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<QuestionFormValues>({
     resolver: zodResolver(questionFormSchema),
     mode: "onTouched",
     defaultValues: {
       category: "",
-      answerType: "multipleChoice",
+      answerType: "MULTIPLE_CHOICE",
       questionText: "",
       options: [
         { text: "", isCorrect: false },
@@ -53,8 +61,50 @@ export default function NewQuestionForm() {
     control,
     name: "options",
   });
-  const onSubmit: SubmitHandler<QuestionFormValues> = (data) =>
-    console.log(data);
+  const onSubmit: SubmitHandler<QuestionFormValues> = async (data) => {
+    const request: CreateQuestionInput = toCreateQuestionPayload(data);
+
+    try {
+      const result = await createQuestion(request);
+      reset();
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof ApiError) {
+        // input field error
+        if (error.fieldErrors.length > 0) {
+          let hasHandledFieldError = false;
+
+          for (const { field, message } of error.fieldErrors) {
+            const formField = toFormFieldName(field);
+
+            if (formField) {
+              setError(
+                formField as FieldPath<QuestionFormValues>,
+                { type: "server", message },
+                { shouldFocus: !hasHandledFieldError },
+              );
+              hasHandledFieldError = true;
+            }
+          }
+          if (hasHandledFieldError) return;
+        }
+        // form-level error
+        setError("root.server", {
+          type: String(error.status),
+          message: error.message,
+        });
+
+        return;
+      }
+
+      setError("root.server", {
+        type: "network",
+        message: "Couldn't reach the server. Please try again.",
+      });
+    }
+  };
 
   function onCancel() {
     reset();
@@ -109,8 +159,8 @@ export default function NewQuestionForm() {
             aria-describedby="answerType-error"
             className="field focus-ring"
           >
-            <option value="multipleChoice">Multiple choice</option>
-            <option value="shortAnswer">Short answer</option>
+            <option value="MULTIPLE_CHOICE">Multiple choice</option>
+            <option value="SHORT_ANSWER">Short answer</option>
           </select>
 
           {errors?.answerType && (
@@ -153,7 +203,7 @@ export default function NewQuestionForm() {
       </div>
 
       {/* Multiple choice fields */}
-      {answerType === "multipleChoice" ? (
+      {answerType === "MULTIPLE_CHOICE" ? (
         <fieldset className="space-y-2">
           <legend className="label">
             Answer options (tick the correct ones)
@@ -244,6 +294,8 @@ export default function NewQuestionForm() {
           )}
         </div>
       )}
+
+      {errors.root?.server && <p role="alert">{errors.root.server.message}</p>}
 
       {/* Form actions */}
       <div className="flex gap-3">

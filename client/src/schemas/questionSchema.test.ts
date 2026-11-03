@@ -66,15 +66,17 @@ describe("questionSchema", () => {
       expect(result.error?.issues[0].path).toEqual(["options"]);
     });
 
-    it("should fail with more than 4 options", () => {
+    it("should fail with more than 10 options", () => {
       const input = {
         ...validQuestionInput,
-        options: validQuestionInput.options.concat(validQuestionInput.options),
+        options: validQuestionInput.options
+          .concat(validQuestionInput.options)
+          .concat(validQuestionInput.options),
       };
       const result = questionFormSchema.safeParse(input);
 
       expect(result.success).toBe(false);
-      expect(result.error?.issues[0].message).toBe("At most 4 answer options");
+      expect(result.error?.issues[0].message).toBe("At most 10 answer options");
       expect(result.error?.issues[0].path).toEqual(["options"]);
     });
 
