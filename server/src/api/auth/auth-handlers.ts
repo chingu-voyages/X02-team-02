@@ -82,16 +82,28 @@ export async function register(
 ): Promise<void> {
   const { username, email, password } = req.body ?? {};
 
-  const fieldErrors = [];
+  const fieldErrors: { field: string; message: string }[] = [];
 
+  // Required fields
   if (typeof username !== "string" || !username.trim()) {
-    fieldErrors.push({ field: "username", message: "Username is required." });
+    fieldErrors.push({
+      field: "username",
+      message: "Username is required.",
+    });
   }
+
   if (typeof email !== "string" || !email.trim()) {
-    fieldErrors.push({ field: "email", message: "Email is required." });
+    fieldErrors.push({
+      field: "email",
+      message: "Email is required.",
+    });
   }
+
   if (typeof password !== "string" || !password) {
-    fieldErrors.push({ field: "password", message: "Password is required." });
+    fieldErrors.push({
+      field: "password",
+      message: "Password is required.",
+    });
   }
 
   if (fieldErrors.length > 0) {
@@ -103,29 +115,46 @@ export async function register(
   }
 
   const normalizedUsername = username.trim().normalize("NFC");
-
-  if (normalizedUsername.length > 50) {
-    res.status(400).json({
-      error: "Username must not exceed 50 characters.",
-    });
-    return;
-  }
-
   const normalizedEmail = email.trim().toLowerCase();
 
-  if (normalizedEmail.length > 255) {
-    res.status(400).json({
-      error: "Email must not exceed 255 characters.",
+  // Username validation
+  if (normalizedUsername.length > 50) {
+    fieldErrors.push({
+      field: "username",
+      message: "Username must not exceed 50 characters.",
     });
-    return;
+  }
+
+  // Email validation
+  if (normalizedEmail.length > 255) {
+    fieldErrors.push({
+      field: "email",
+      message: "Email must not exceed 255 characters.",
+    });
   }
 
   if (
     /\s/.test(normalizedEmail) ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
   ) {
+    fieldErrors.push({
+      field: "email",
+      message: "Email must be a valid email address.",
+    });
+  }
+
+  // Password validation
+  if (password.length < 8) {
+    fieldErrors.push({
+      field: "password",
+      message: "Password must be at least 8 characters.",
+    });
+  }
+
+  if (fieldErrors.length > 0) {
     res.status(400).json({
-      error: "Email must be a valid email address.",
+      error: "Validation failed.",
+      fieldErrors,
     });
     return;
   }
