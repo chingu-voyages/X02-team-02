@@ -78,6 +78,28 @@ describe("Auth routes", () => {
       );
     });
 
+    it("accepts a password that is exactly 8 characters long", async () => {
+      const user = {
+        ...validUser,
+        password: "12345678",
+      };
+    
+      mockCreate.mockResolvedValue({
+        id: "00000000-0000-0000-0000-000000000001",
+        username: user.username,
+        email: user.email,
+        role: "LEARNER",
+      });
+    
+      const response = await request(app)
+        .post("/api/auth/register")
+        .send(user);
+    
+      expect(response.status).toBe(201);
+      expect(mockHashPassword).toHaveBeenCalledWith(user.password);
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+    });
+
     it("returns 400 when the request body is invalid", async () => {
       const response = await request(app)
         .post("/api/auth/register")
@@ -90,6 +112,93 @@ describe("Auth routes", () => {
       expect(response.status).toBe(400);
       expect(mockCreate).not.toHaveBeenCalled();
       expect(mockHashPassword).not.toHaveBeenCalled();
+    });
+
+    it("returns field errors when required registration fields are missing", async () => {
+      const response = await request(app)
+        .post("/api/auth/register")
+        .send({
+          username: "",
+          email: "",
+          password: "",
+        });
+    
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "Validation failed.",
+        fieldErrors: [
+          {
+            field: "username",
+            message: "Username is required.",
+          },
+          {
+            field: "email",
+            message: "Email is required.",
+          },
+          {
+            field: "password",
+            message: "Password is required.",
+          },
+        ],
+      });
+    
+      expect(mockCreate).not.toHaveBeenCalled();
+      expect(mockHashPassword).not.toHaveBeenCalled();
+    });
+
+    it("returns all registration field errors in one response", async () => {
+      const response = await request(app)
+        .post("/api/auth/register")
+        .send({
+          username: "u".repeat(51),
+          email: "invalid-email",
+          password: "short",
+        });
+    
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "Validation failed.",
+        fieldErrors: [
+          {
+            field: "username",
+            message: "Username must not exceed 50 characters.",
+          },
+          {
+            field: "email",
+            message: "Email must be a valid email address.",
+          },
+          {
+            field: "password",
+            message: "Password must be at least 8 characters.",
+          },
+        ],
+      });
+    
+      expect(mockHashPassword).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it("returns a field error when the password is shorter than 8 characters", async () => {
+      const response = await request(app)
+        .post("/api/auth/register")
+        .send({
+          ...validUser,
+          password: "Short7!",
+        });
+    
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "Validation failed.",
+        fieldErrors: [
+          {
+            field: "password",
+            message: "Password must be at least 8 characters.",
+          },
+        ],
+      });
+    
+      expect(mockHashPassword).not.toHaveBeenCalled();
+      expect(mockCreate).not.toHaveBeenCalled();
     });
 
     it("returns 409 when the username already exists", async () => {
