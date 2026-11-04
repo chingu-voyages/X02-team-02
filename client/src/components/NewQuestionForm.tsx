@@ -212,13 +212,14 @@ export default function NewQuestionForm() {
           {fields.map((field, index) => {
             const letter = String.fromCharCode(65 + index);
 
-            // TODO: re-validate options.root when a checkbox changes (register deps / trigger)
             return (
               <div key={field.id}>
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    {...register(`options.${index}.isCorrect`)}
+                    {...register(`options.${index}.isCorrect`, {
+                      deps: "options",
+                    })}
                     aria-label={`Option ${letter} is correct`}
                     className="size-5 shrink-0 focus-ring"
                   />

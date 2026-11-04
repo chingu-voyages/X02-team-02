@@ -1,18 +1,14 @@
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import { getQuestions } from "../api/questions.ts";
-import type {
-  QuestionListItem,
-  QuestionReviewStatus,
-} from "../api/questions.ts";
+import type { LoadedQuestion, QuestionReviewStatus } from "../api/questions.ts";
 
 type StatusFilter = QuestionReviewStatus | "ALL";
 
-// TODO: "Flagged" pill removed for now because the backend has no FLAGGED status yet.
 const filterOptions: { label: string; value: StatusFilter }[] = [
   { label: "Pending", value: "PENDING" },
-  { label: "Rejected", value: "REJECTED" },
   { label: "Approved", value: "APPROVED" },
+  { label: "Rejected", value: "REJECTED" },
   { label: "Flagged", value: "FLAGGED" },
   { label: "All", value: "ALL" },
 ];
@@ -33,9 +29,11 @@ const statusStyles: Record<QuestionReviewStatus, string> = {
   FLAGGED: "bg-danger-soft border-danger-line text-danger-fg",
 };
 
+// TODO: pagination
+
 export default function AdminQuestionsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("PENDING");
-  const [questions, setQuestions] = useState<QuestionListItem[]>([]);
+  const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,7 +42,7 @@ export default function AdminQuestionsPage() {
 
     getQuestions()
       .then((data) => {
-        if (!ignore) setQuestions(data);
+        if (!ignore) setQuestions(data.questions);
       })
       .catch(() => {
         if (!ignore) setError("Couldn't load questions.");
@@ -136,9 +134,11 @@ export default function AdminQuestionsPage() {
             <tbody>
               {filteredQuestions.map((question) => (
                 <tr key={question.id}>
-                  <td className="cell max-w-xs truncate">{question.text}</td>
+                  <td className="cell max-w-xs truncate">
+                    {question.content.text}
+                  </td>
                   <td className="cell hidden sm:table-cell">
-                    {question.category ?? "Uncategorized"}
+                    {question.category}
                   </td>
                   <td className="cell">
                     <span
@@ -148,7 +148,7 @@ export default function AdminQuestionsPage() {
                     </span>
                   </td>
                   <td className="cell hidden md:table-cell">
-                    {question.authorUsername}
+                    {question.authorId}
                   </td>
                   <td className="cell text-right">
                     <Link
