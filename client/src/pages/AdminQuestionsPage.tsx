@@ -1,18 +1,15 @@
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import { getQuestions } from "../api/questions.ts";
-import type {
-  QuestionListItem,
-  QuestionReviewStatus,
-} from "../api/questions.ts";
+import type { LoadedQuestion, QuestionReviewStatus } from "../api/questions.ts";
 
 type StatusFilter = QuestionReviewStatus | "ALL";
 
-// TODO: "Flagged" pill removed for now because the backend has no FLAGGED status yet.
 const filterOptions: { label: string; value: StatusFilter }[] = [
   { label: "Pending", value: "PENDING" },
-  { label: "Rejected", value: "REJECTED" },
   { label: "Approved", value: "APPROVED" },
+  { label: "Rejected", value: "REJECTED" },
+  { label: "Flagged", value: "FLAGGED" },
   { label: "All", value: "ALL" },
 ];
 
@@ -21,6 +18,7 @@ const statusLabels: Record<QuestionReviewStatus, string> = {
   PENDING: "Pending",
   APPROVED: "Approved",
   REJECTED: "Rejected",
+  FLAGGED: "Flagged",
 };
 
 const statusStyles: Record<QuestionReviewStatus, string> = {
@@ -28,17 +26,14 @@ const statusStyles: Record<QuestionReviewStatus, string> = {
   PENDING: "bg-warning-soft border-warning-line text-warning-fg",
   APPROVED: "bg-success-soft border-success-line text-success-fg",
   REJECTED: "bg-danger-soft border-danger-line text-danger-fg",
+  FLAGGED: "bg-danger-soft border-danger-line text-danger-fg",
 };
 
-const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-
-const cellClass =
-  "border-y border-line bg-surface px-4 py-3 first:rounded-l-md first:border-l last:rounded-r-md last:border-r";
+// TODO: pagination
 
 export default function AdminQuestionsPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("PENDING");
-  const [questions, setQuestions] = useState<QuestionListItem[]>([]);
+  const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +42,7 @@ export default function AdminQuestionsPage() {
 
     getQuestions()
       .then((data) => {
-        if (!ignore) setQuestions(data);
+        if (!ignore) setQuestions(data.questions);
       })
       .catch(() => {
         if (!ignore) setError("Couldn't load questions.");
@@ -89,7 +84,7 @@ export default function AdminQuestionsPage() {
               type="button"
               aria-pressed={statusFilter === option.value}
               onClick={() => setStatusFilter(option.value)}
-              className={`rounded-full border px-4 py-1.5 text-sm ${focusRing} ${
+              className={`rounded-full border px-4 py-1.5 text-sm focus-ring ${
                 statusFilter === option.value
                   ? "border-accent-line bg-accent-soft text-accent-fg"
                   : "border-line-strong bg-page text-fg hover:bg-surface"
@@ -103,7 +98,7 @@ export default function AdminQuestionsPage() {
 
         <Link
           to="/admin/questions/new"
-          className={`rounded-md border border-accent-line bg-accent-soft px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent-line/50 ${focusRing}`}
+          className="rounded-md border border-accent-line bg-accent-soft px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent-line/50 focus-ring"
         >
           + New Question
         </Link>
@@ -139,26 +134,26 @@ export default function AdminQuestionsPage() {
             <tbody>
               {filteredQuestions.map((question) => (
                 <tr key={question.id}>
-                  <td className={`${cellClass} max-w-xs truncate`}>
-                    {question.text}
+                  <td className="cell max-w-xs truncate">
+                    {question.content.text}
                   </td>
-                  <td className={`${cellClass} hidden sm:table-cell`}>
-                    {question.category ?? "Uncategorized"}
+                  <td className="cell hidden sm:table-cell">
+                    {question.category}
                   </td>
-                  <td className={cellClass}>
+                  <td className="cell">
                     <span
                       className={`rounded-full border px-2 py-0.5 text-sm ${statusStyles[question.reviewStatus]}`}
                     >
                       {statusLabels[question.reviewStatus]}
                     </span>
                   </td>
-                  <td className={`${cellClass} hidden md:table-cell`}>
-                    {question.authorUsername}
+                  <td className="cell hidden md:table-cell">
+                    {question.authorId}
                   </td>
-                  <td className={`${cellClass} text-right`}>
+                  <td className="cell text-right">
                     <Link
                       to={`/admin/questions/${question.id}`}
-                      className={`text-fg-muted hover:text-fg ${focusRing}`}
+                      className="text-fg-muted hover:text-fg focus-ring"
                     >
                       {question.reviewStatus === "PENDING" ? "Review" : "Edit"}{" "}
                       &gt;

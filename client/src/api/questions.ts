@@ -1,52 +1,47 @@
-export type QuestionReviewStatus =
-  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED";
+import { apiFetch } from "./client.ts";
+import { type CreateQuestionInput } from "@x02/shared";
 
-// If the API response looks different getQuestions() can map it onto this shape or FE can be changed to match the API response.
-export type QuestionListItem = {
+export type QuestionReviewStatus =
+  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
+
+// TODO: add options to content when the detail page is built
+type CreatedQuestion = {
   id: string;
-  text: string;
-  category: string | null;
-  reviewStatus: QuestionReviewStatus;
-  authorUsername: string;
   createdAt: string;
+  updatedAt: string;
+  answerType: "MULTIPLE_CHOICE" | "SHORT_ANSWER" | "ESSAY";
+  content: { text: string };
+  category: string;
+  difficulty: string | null;
+  reviewStatus: QuestionReviewStatus;
+  authorId: string;
 };
 
-const placeholderQuestions: QuestionListItem[] = [
-  {
-    id: "1",
-    text: "Who is responsible for maximizing the value of the product?",
-    category: "PSPO",
-    reviewStatus: "PENDING",
-    authorUsername: "user1",
-    createdAt: "2026-10-20T10:00:00Z",
-  },
-  {
-    id: "2",
-    text: "How long is a Sprint at most?",
-    category: "PSM",
-    reviewStatus: "APPROVED",
-    authorUsername: "user1",
-    createdAt: "2026-10-21T09:30:00Z",
-  },
-  {
-    id: "3",
-    text: "Who can cancel a Sprint?",
-    category: null,
-    reviewStatus: "REJECTED",
-    authorUsername: "admin1",
-    createdAt: "2026-10-22T14:15:00Z",
-  },
-  {
-    id: "4",
-    text: "What is the purpose of the Daily Scrum?",
-    category: "PSM",
-    reviewStatus: "APPROVED",
-    authorUsername: "admin1",
-    createdAt: "2026-10-23T08:45:00Z",
-  },
-];
+type CreateQuestionResponse = {
+  message: string;
+  question: CreatedQuestion;
+};
 
-export async function getQuestions(): Promise<QuestionListItem[]> {
-  // TODO: replace with apiFetch once the server endpoint exists and map the response
-  return placeholderQuestions;
+// TODO: add options to content when the detail page is built
+export type LoadedQuestion = CreatedQuestion;
+
+export type LoadQuestionsResponse = {
+  questions: LoadedQuestion[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export const createQuestion = (body: CreateQuestionInput) => {
+  return apiFetch<CreateQuestionResponse>("/questions/create", {
+    method: "POST",
+    body,
+  });
+};
+
+export async function getQuestions(): Promise<LoadQuestionsResponse> {
+  return apiFetch<LoadQuestionsResponse>("/questions");
 }

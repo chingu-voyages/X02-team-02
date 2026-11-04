@@ -33,13 +33,8 @@ export async function createQuestion(
     return;
   }
 
-  const {
-    answerType,
-    content,
-    answerKey,
-    category,
-    difficulty,
-  } = validation.data;
+  const { answerType, content, answerKey, category, difficulty } =
+    validation.data;
 
   try {
     const question = await prisma.question.create({
@@ -100,9 +95,7 @@ export async function loadQuestions(
 
     const parsed = Number(value);
 
-    return Number.isSafeInteger(parsed) && parsed > 0
-      ? parsed
-      : null;
+    return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
   };
 
   const page = parseQueryNumber(req.query?.page, DEFAULT_PAGE);
@@ -116,10 +109,12 @@ export async function loadQuestions(
           ? [{ field: "page", message: "Page must be a positive integer." }]
           : []),
         ...(limit === null || limit > MAX_LIMIT
-          ? [{
-              field: "limit",
-              message: `Limit must be a positive integer no greater than ${MAX_LIMIT}.`,
-            }]
+          ? [
+              {
+                field: "limit",
+                message: `Limit must be a positive integer no greater than ${MAX_LIMIT}.`,
+              },
+            ]
           : []),
       ],
     });
@@ -131,13 +126,11 @@ export async function loadQuestions(
   try {
     const [questions, total] = await Promise.all([
       prisma.question.findMany({
-        where: {
-          reviewStatus: "APPROVED",
-        },
-        orderBy: [
-          { createdAt: "desc" },
-          { id: "asc" },
-        ],
+        // TODO: temporary change for /admin/questions page
+        // where: {
+        //   reviewStatus: "APPROVED",
+        // },
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
         skip,
         take: limit,
         select: {
@@ -148,13 +141,14 @@ export async function loadQuestions(
           content: true,
           category: true,
           difficulty: true,
+          reviewStatus: true, // TODO: temporary change for /admin/questions page
+          authorId: true, // TODO: temporary change for /admin/questions page
         },
       }),
-      prisma.question.count({
-        where: {
-          reviewStatus: "APPROVED",
-        },
-      }),
+      prisma.question.count(
+        // TODO: temporary change for /admin/questions page
+        // { where: { reviewStatus: "APPROVED" } }
+      ),
     ]);
 
     res.status(200).json({

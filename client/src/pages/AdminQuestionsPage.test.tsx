@@ -4,29 +4,40 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import AdminQuestionsPage from "./AdminQuestionsPage";
 import { getQuestions } from "../api/questions";
-import type { QuestionListItem } from "../api/questions";
+import type { LoadQuestionsResponse } from "../api/questions";
 
 vi.mock("../api/questions.ts", () => ({ getQuestions: vi.fn() }));
 const mockGetQuestions = vi.mocked(getQuestions);
 
-const questions: QuestionListItem[] = [
-  {
-    id: "1",
-    text: "Who is responsible for maximizing the value of the product?",
-    category: "PSPO",
-    reviewStatus: "PENDING",
-    authorUsername: "user1",
-    createdAt: "2026-10-20T10:00:00Z",
-  },
-  {
-    id: "2",
-    text: "How long is a Sprint at most?",
-    category: "PSM",
-    reviewStatus: "APPROVED",
-    authorUsername: "user1",
-    createdAt: "2026-10-21T09:30:00Z",
-  },
-];
+const data: LoadQuestionsResponse = {
+  pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
+  questions: [
+    {
+      id: "11111111-1111-1111-1111-111111111111",
+      createdAt: "2026-10-20T10:00:00Z",
+      updatedAt: "2026-10-29T10:00:00Z",
+      answerType: "MULTIPLE_CHOICE",
+      content: {
+        text: "Who is responsible for maximizing the value of the product?",
+      },
+      category: "PSPO",
+      reviewStatus: "PENDING",
+      difficulty: null,
+      authorId: "user1",
+    },
+    {
+      id: "21111111-1111-1111-1111-111111111111",
+      createdAt: "2026-10-20T10:00:00Z",
+      updatedAt: "2026-10-29T10:00:00Z",
+      answerType: "SHORT_ANSWER",
+      content: { text: "How long is a Sprint at most?" },
+      category: "PSM",
+      reviewStatus: "APPROVED",
+      difficulty: null,
+      authorId: "user1",
+    },
+  ],
+};
 
 describe("AdminQuestionsPage", () => {
   beforeEach(() => {
@@ -34,7 +45,7 @@ describe("AdminQuestionsPage", () => {
   });
 
   it("shows loading, then the questions", async () => {
-    mockGetQuestions.mockResolvedValue(questions);
+    mockGetQuestions.mockResolvedValue(data);
     render(
       <MemoryRouter>
         <AdminQuestionsPage />
@@ -52,7 +63,7 @@ describe("AdminQuestionsPage", () => {
 
   it("filters approved questions correctly", async () => {
     const user = userEvent.setup();
-    mockGetQuestions.mockResolvedValue(questions);
+    mockGetQuestions.mockResolvedValue(data);
 
     render(
       <MemoryRouter>
@@ -93,7 +104,7 @@ describe("AdminQuestionsPage", () => {
 
   it("shows counts from the full list and keeps them when the filter changes", async () => {
     const user = userEvent.setup();
-    mockGetQuestions.mockResolvedValue(questions);
+    mockGetQuestions.mockResolvedValue(data);
 
     render(
       <MemoryRouter>
@@ -128,7 +139,7 @@ describe("AdminQuestionsPage", () => {
 
   it("shows 'No rejected questions.' when the rejected filter matches nothing", async () => {
     const user = userEvent.setup();
-    mockGetQuestions.mockResolvedValue(questions);
+    mockGetQuestions.mockResolvedValue(data);
 
     render(
       <MemoryRouter>
@@ -149,7 +160,7 @@ describe("AdminQuestionsPage", () => {
 
   it("shows 'No questions yet.' with an empty list", async () => {
     const user = userEvent.setup();
-    mockGetQuestions.mockResolvedValue([]);
+    mockGetQuestions.mockResolvedValue({ ...data, questions: [] });
 
     render(
       <MemoryRouter>
