@@ -1,11 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { registerFormSchema } from "./authSchema.ts";
+import { registerFormSchema, loginFormSchema } from "./authSchema.ts";
 
 const validRegisterInput = {
   username: "  testname ",
   email: " test@example.com ",
   password: "Password1!",
   confirmPassword: "Password1!",
+};
+
+const validLoginInput = {
+  email: " test@example.com ",
+  password: "Password1!",
 };
 
 describe("registerFormSchema", () => {
@@ -22,7 +27,7 @@ describe("registerFormSchema", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toBe(
-        "Username must be at least 1 character.",
+        "Username must be at least 1 character",
       );
       expect(result.error?.issues[0].path).toEqual(["username"]);
     });
@@ -33,7 +38,7 @@ describe("registerFormSchema", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toBe(
-        "Username must be at least 1 character.",
+        "Username must be at least 1 character",
       );
       expect(result.error?.issues[0].path).toEqual(["username"]);
     });
@@ -44,7 +49,7 @@ describe("registerFormSchema", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toBe(
-        "Username must not exceed 50 characters.",
+        "Username must not exceed 50 characters",
       );
       expect(result.error?.issues[0].path).toEqual(["username"]);
     });
@@ -57,7 +62,7 @@ describe("registerFormSchema", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toBe(
-        "Enter a valid email address.",
+        "Enter a valid email address",
       );
       expect(result.error?.issues[0].path).toEqual(["email"]);
     });
@@ -71,7 +76,7 @@ describe("registerFormSchema", () => {
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toBe(
-        "Email cannot exceed 255 characters.",
+        "Email cannot exceed 255 characters",
       );
       expect(result.error?.issues[0].path).toEqual(["email"]);
     });
@@ -82,12 +87,12 @@ describe("registerFormSchema", () => {
       [
         "is shorter than 8 characters",
         "Abc1!",
-        "Password must be at least 8 characters.",
+        "Password must be at least 8 characters",
       ],
       [
         "is longer than 64 characters",
         "x".repeat(65),
-        "Password must not exceed 64 characters.",
+        "Password must not exceed 64 characters",
       ],
       [
         "has no lowercase letter",
@@ -133,6 +138,38 @@ describe("registerFormSchema", () => {
         "Please confirm your password",
       );
       expect(result.error?.issues[0].path).toEqual(["confirmPassword"]);
+    });
+  });
+});
+
+describe("loginFormSchema", () => {
+  it("accepts fully valid input", () => {
+    const result = loginFormSchema.safeParse(validLoginInput);
+
+    expect(result.success).toBe(true);
+  });
+
+  describe("email", () => {
+    it("should fail when in invalid format", () => {
+      const input = { ...validLoginInput, email: "testexample.com" };
+      const result = loginFormSchema.safeParse(input);
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toBe(
+        "Enter a valid email address",
+      );
+      expect(result.error?.issues[0].path).toEqual(["email"]);
+    });
+  });
+
+  describe("password", () => {
+    it("should fail when empty", () => {
+      const input = { ...validRegisterInput, password: "" };
+      const result = loginFormSchema.safeParse(input);
+
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0].message).toBe("Enter your password");
+      expect(result.error?.issues[0].path).toEqual(["password"]);
     });
   });
 });
