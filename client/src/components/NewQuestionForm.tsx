@@ -18,6 +18,7 @@ import {
   toFormFieldName,
 } from "../api/questionMapper.ts";
 import { ApiError } from "../api/client.ts";
+import { useNavigate } from "react-router";
 
 type MultipleChoiceValues = Extract<
   QuestionFormValues,
@@ -35,7 +36,6 @@ export default function NewQuestionForm() {
   const {
     register,
     handleSubmit,
-    reset,
     control,
     setError,
     formState: { errors, isSubmitting },
@@ -52,6 +52,9 @@ export default function NewQuestionForm() {
       ],
     },
   });
+
+  const navigate = useNavigate();
+
   const optionErrors = (errors as FieldErrors<MultipleChoiceValues>).options;
   const modelAnswerError = (errors as FieldErrors<ShortAnswerValues>)
     .modelAnswer;
@@ -65,12 +68,9 @@ export default function NewQuestionForm() {
     const request: CreateQuestionInput = toCreateQuestionPayload(data);
 
     try {
-      const result = await createQuestion(request);
-      reset();
-      console.log(result);
+      await createQuestion(request);
+      navigate("/admin/questions");
     } catch (error) {
-      console.log(error);
-
       if (error instanceof ApiError) {
         // input field error
         if (error.fieldErrors.length > 0) {
@@ -99,6 +99,7 @@ export default function NewQuestionForm() {
         return;
       }
 
+      // network error
       setError("root.server", {
         type: "network",
         message: "Couldn't reach the server. Please try again.",
@@ -107,13 +108,12 @@ export default function NewQuestionForm() {
   };
 
   function onCancel() {
-    reset();
-    // TODO - navigate back /questions
+    navigate("/admin/questions");
   }
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, (errs) => console.log(errs))}
+      onSubmit={handleSubmit(onSubmit)}
       className="max-w-xl space-y-5"
       noValidate
     >
@@ -212,6 +212,7 @@ export default function NewQuestionForm() {
           {fields.map((field, index) => {
             const letter = String.fromCharCode(65 + index);
 
+            // TODO: re-validate options.root when a checkbox changes (register deps / trigger)
             return (
               <div key={field.id}>
                 <div className="flex items-center gap-2">
@@ -295,7 +296,11 @@ export default function NewQuestionForm() {
         </div>
       )}
 
-      {errors.root?.server && <p role="alert">{errors.root.server.message}</p>}
+      {errors.root?.server && (
+        <p className="text-sm text-red-600" role="alert">
+          {errors.root.server.message}
+        </p>
+      )}
 
       {/* Form actions */}
       <div className="flex gap-3">

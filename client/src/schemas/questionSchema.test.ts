@@ -3,7 +3,7 @@ import { questionFormSchema } from "./questionSchema";
 
 const validQuestionInput = {
   category: " PSPO ",
-  answerType: "multipleChoice",
+  answerType: "MULTIPLE_CHOICE",
   questionText: "Who is responsible for maximizing the value of the product?",
   options: [
     {
@@ -27,7 +27,7 @@ const validQuestionInput = {
 
 const validShortAnswerInput = {
   category: "PSM",
-  answerType: "shortAnswer",
+  answerType: "SHORT_ANSWER",
   questionText: "Who is responsible for maximizing the value of the product?",
   modelAnswer: "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
 };

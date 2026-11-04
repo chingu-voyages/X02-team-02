@@ -13,6 +13,7 @@ const filterOptions: { label: string; value: StatusFilter }[] = [
   { label: "Pending", value: "PENDING" },
   { label: "Rejected", value: "REJECTED" },
   { label: "Approved", value: "APPROVED" },
+  { label: "Flagged", value: "FLAGGED" },
   { label: "All", value: "ALL" },
 ];
 
@@ -21,6 +22,7 @@ const statusLabels: Record<QuestionReviewStatus, string> = {
   PENDING: "Pending",
   APPROVED: "Approved",
   REJECTED: "Rejected",
+  FLAGGED: "Flagged",
 };
 
 const statusStyles: Record<QuestionReviewStatus, string> = {
@@ -28,6 +30,7 @@ const statusStyles: Record<QuestionReviewStatus, string> = {
   PENDING: "bg-warning-soft border-warning-line text-warning-fg",
   APPROVED: "bg-success-soft border-success-line text-success-fg",
   REJECTED: "bg-danger-soft border-danger-line text-danger-fg",
+  FLAGGED: "bg-danger-soft border-danger-line text-danger-fg",
 };
 
 export default function AdminQuestionsPage() {
