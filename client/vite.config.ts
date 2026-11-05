@@ -9,6 +9,9 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     strictPort: true,
+    // Lets a public tunnel (for a demo link) reach the dev server. Vite blocks other
+    // hostnames by default.
+    allowedHosts: [".trycloudflare.com", ".ngrok-free.app", ".ngrok.app", ".loca.lt"],
     // Forward /api requests to the API server, so the browser only talks to one origin.
     // Inside Docker Compose the target is set to http://server:3000.
     proxy: {

@@ -103,6 +103,19 @@ The sample questions are original. They are based on concepts from the [Scrum Gu
 
 ---
 
+## Practice quiz demo
+
+A public demo of the quiz: 20 random seeded questions, one at a time, with a score and the correct answers at the end. No login needed.
+
+1. Start everything and apply the migrations (see Quick Start), then seed the questions (see above).
+2. Open http://localhost:5173/practice-exam
+
+The quiz is on by default in development and **off in production**: with `NODE_ENV=production` the `/api/practice/*` routes answer 404. Set `ENABLE_PUBLIC_PRACTICE=true` to turn it on anyway, or `ENABLE_PUBLIC_PRACTICE=false` to turn it off in development.
+
+This version keeps no history: answers stay in the browser until the end, and nothing is saved.
+
+---
+
 ## System Architecture
 
 WIP
