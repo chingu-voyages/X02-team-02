@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import NewQuestionPage from "./pages/NewQuestionPage.tsx";
+import PracticeExamPage from "./pages/PracticeExamPage.tsx";
 
 export default function App() {
   return (
@@ -16,6 +17,8 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          {/* Public demo quiz: no login needed. */}
+          <Route path="/practice-exam" element={<PracticeExamPage />} />
 
           <Route element={<RequireAuth />}>
             <Route path="/admin" element={<Layout />}>

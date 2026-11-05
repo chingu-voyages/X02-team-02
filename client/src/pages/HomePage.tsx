@@ -9,6 +9,8 @@ export default function HomePage() {
       <p>This is the home page.</p>
       <nav>
         <Link to="/login">Login</Link>
+        {" | "}
+        <Link to="/practice-exam">Practice exam</Link>
       </nav>
       <p>Status: {status}</p>
     </main>

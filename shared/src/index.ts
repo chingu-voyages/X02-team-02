@@ -56,3 +56,15 @@ export {
 export type {
   CreateQuestionInput,
 } from "./schemas/question.js";
+
+export { practiceGradeRequestSchema } from "./practice.js";
+
+export type {
+  PracticeAnswer,
+  PracticeGradeRequest,
+  PracticeGradeResponse,
+  PracticeOption,
+  PracticeQuestion,
+  PracticeQuestionsResponse,
+  PracticeResult,
+} from "./practice.js";
