@@ -15,7 +15,7 @@ export default function RegisterPage() {
       <p className="mt-2 text-center text-sm text-fg-muted">
         Already have an account?{" "}
         <Link to="/login" className="text-accent-fg hover:underline focus-ring">
-          Login
+          Log in
         </Link>
       </p>
     </main>
