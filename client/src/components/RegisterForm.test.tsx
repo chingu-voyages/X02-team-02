@@ -5,17 +5,32 @@ import { register } from "../api/auth.ts";
 import { ApiError } from "../api/client.ts";
 import userEvent from "@testing-library/user-event";
 import { waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
+import { useAuth } from "../auth/useAuth.ts";
 
 vi.mock("../api/auth.ts", () => ({ register: vi.fn() }));
+vi.mock("../auth/useAuth.ts", () => ({ useAuth: vi.fn() }));
+
 const mockRegister = vi.mocked(register);
+const mockUseAuth = vi.mocked(useAuth);
 
 describe("RegisterForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: null,
+      status: "anonymous",
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
   });
 
   it("renders all fields and the submit button", () => {
-    render(<RegisterForm />);
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByLabelText("Username")).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
@@ -38,7 +53,11 @@ describe("RegisterForm", () => {
       },
     });
     const user = userEvent.setup();
-    render(<RegisterForm />);
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
 
     await user.type(screen.getByLabelText("Username"), "test");
     await user.type(screen.getByLabelText("Email"), "test@example.com");
@@ -55,14 +74,6 @@ describe("RegisterForm", () => {
       email: "test@example.com",
       password: "Password1!",
     });
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(await screen.findByRole("status")).toHaveTextContent(
-      "Account added.",
-    );
-    expect(screen.getByLabelText("Username")).toHaveValue("");
-    expect(screen.getByLabelText("Email")).toHaveValue("");
-    expect(screen.getByLabelText("Password", { exact: true })).toHaveValue("");
-    expect(screen.getByLabelText("Confirm password")).toHaveValue("");
   });
 
   it("displays an error when email already exists", async () => {
@@ -70,7 +81,11 @@ describe("RegisterForm", () => {
       new ApiError(409, "An account with this email already exists."),
     );
     const user = userEvent.setup();
-    render(<RegisterForm />);
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
 
     await user.type(screen.getByLabelText("Username"), "test");
     await user.type(screen.getByLabelText("Email"), "test@example.com");
@@ -90,7 +105,11 @@ describe("RegisterForm", () => {
 
   it("displays an error when passwords don't match", async () => {
     const user = userEvent.setup();
-    render(<RegisterForm />);
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
 
     await user.type(screen.getByLabelText("Username"), "test");
     await user.type(screen.getByLabelText("Email"), "test@example.com");

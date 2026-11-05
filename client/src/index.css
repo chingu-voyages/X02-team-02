@@ -53,4 +53,16 @@
   .field {
     @apply w-full rounded-md border border-line-strong bg-page px-3 py-2 text-fg;
   }
+
+  .btn-primary {
+    @apply rounded-md bg-accent px-4 py-2 font-medium text-white hover:bg-accent-hover disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply rounded-md border border-accent-line bg-accent-soft px-4 py-2 font-medium text-accent-fg hover:bg-accent-line/50 disabled:opacity-50;
+  }
+
+  .btn-neutral {
+    @apply rounded-md border px-4 py-2 font-medium border-line-strong bg-page text-fg hover:bg-surface disabled:opacity-50;
+  }
 }

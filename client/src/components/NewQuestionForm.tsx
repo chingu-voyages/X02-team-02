@@ -308,14 +308,14 @@ export default function NewQuestionForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md border border-accent-line bg-accent-soft px-4 py-2 font-medium text-accent-fg hover:bg-accent-line/50 focus-ring"
+          className="btn-primary focus-ring"
         >
           Submit question
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-md border px-4 py-2 font-medium border-line-strong bg-page text-fg hover:bg-surface focus-ring"
+          className="btn-neutral focus-ring"
         >
           Cancel
         </button>

@@ -3,16 +3,21 @@ import RegisterForm from "../components/RegisterForm.tsx";
 
 export default function RegisterPage() {
   return (
-    <main className="register-page">
-      <h2>Register</h2>
-      <RegisterForm />
-      <p>Register page coming soon.</p>
-      <p>
-        Already have an account? <Link to="/login">Login</Link>
+    <main className="mx-auto w-full max-w-sm p-5">
+      <Link to="/" className="mb-6 block text-center focus-ring">
+        Logo
+      </Link>
+      <h1 className="text-xl font-semibold text-center mb-1">Register</h1>
+      <p className="text-center text-fg-muted mb-6">
+        Sign up to start practicing.
       </p>
-      <nav>
-        <Link to="/">Home</Link>
-      </nav>
+      <RegisterForm />
+      <p className="mt-2 text-center text-sm text-fg-muted">
+        Already have an account?{" "}
+        <Link to="/login" className="text-accent-fg hover:underline focus-ring">
+          Log in
+        </Link>
+      </p>
     </main>
   );
 }
