@@ -1,0 +1,907 @@
+[
+  {
+    "seedId": "scrum-001",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Who is accountable for maximizing the value of the product resulting from the work of the Scrum Team?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Product Owner"
+        },
+        {
+          "id": "b",
+          "text": "The Developers"
+        },
+        {
+          "id": "c",
+          "text": "The stakeholders"
+        },
+        {
+          "id": "d",
+          "text": "The Scrum Master"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-002",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "What is the maximum length of a Sprint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "There is no limit if the team agrees"
+        },
+        {
+          "id": "b",
+          "text": "Six weeks"
+        },
+        {
+          "id": "c",
+          "text": "One month"
+        },
+        {
+          "id": "d",
+          "text": "Two weeks"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-003",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Who has the authority to cancel a Sprint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Scrum Master"
+        },
+        {
+          "id": "b",
+          "text": "The Developers"
+        },
+        {
+          "id": "c",
+          "text": "The stakeholders"
+        },
+        {
+          "id": "d",
+          "text": "The Product Owner"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-004",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "The Daily Scrum is a 15-minute event for which group?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Only the Product Owner"
+        },
+        {
+          "id": "b",
+          "text": "The Developers"
+        },
+        {
+          "id": "c",
+          "text": "Only the Scrum Master"
+        },
+        {
+          "id": "d",
+          "text": "The stakeholders"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "b"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-005",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "What is the Sprint Goal?",
+      "options": [
+        {
+          "id": "a",
+          "text": "A single objective for the Sprint that gives the work coherence and focus"
+        },
+        {
+          "id": "b",
+          "text": "A forecast of the team's velocity"
+        },
+        {
+          "id": "c",
+          "text": "A list of every task the Developers will complete"
+        },
+        {
+          "id": "d",
+          "text": "A delivery date promised to the stakeholders"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-006",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which artifact has the Definition of Done as its commitment?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Sprint Backlog"
+        },
+        {
+          "id": "b",
+          "text": "The Increment"
+        },
+        {
+          "id": "c",
+          "text": "The Product Backlog"
+        },
+        {
+          "id": "d",
+          "text": "The Product Goal"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "b"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-007",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Who is accountable for creating the plan for the Sprint, the Sprint Backlog?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Scrum Master"
+        },
+        {
+          "id": "b",
+          "text": "The Product Owner"
+        },
+        {
+          "id": "c",
+          "text": "The Developers"
+        },
+        {
+          "id": "d",
+          "text": "The stakeholders"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-008",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "What happens immediately after a Sprint ends?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Increment is always released to production"
+        },
+        {
+          "id": "b",
+          "text": "The Product Owner selects a new Scrum Team"
+        },
+        {
+          "id": "c",
+          "text": "A new Sprint starts"
+        },
+        {
+          "id": "d",
+          "text": "The team takes a planning break of at least a week"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-009",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which of these is an accountability of the Scrum Master?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Establishing Scrum as defined in the Scrum Guide"
+        },
+        {
+          "id": "b",
+          "text": "Creating the Sprint Backlog"
+        },
+        {
+          "id": "c",
+          "text": "Ordering the Product Backlog"
+        },
+        {
+          "id": "d",
+          "text": "Deciding which stakeholder feedback to accept"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-010",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "What is the maximum timebox for a Sprint Review in a one-month Sprint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Eight hours"
+        },
+        {
+          "id": "b",
+          "text": "Two hours"
+        },
+        {
+          "id": "c",
+          "text": "Three hours"
+        },
+        {
+          "id": "d",
+          "text": "Four hours"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-011",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "What is the maximum timebox for a Sprint Retrospective in a one-month Sprint?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Four hours"
+        },
+        {
+          "id": "b",
+          "text": "One hour"
+        },
+        {
+          "id": "c",
+          "text": "Eight hours"
+        },
+        {
+          "id": "d",
+          "text": "Three hours"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-012",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which Scrum value is shown when the Scrum Team and its stakeholders are open about the work and the challenges?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Courage"
+        },
+        {
+          "id": "b",
+          "text": "Focus"
+        },
+        {
+          "id": "c",
+          "text": "Openness"
+        },
+        {
+          "id": "d",
+          "text": "Respect"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-013",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "What is the purpose of the Sprint Retrospective?",
+      "options": [
+        {
+          "id": "a",
+          "text": "To demonstrate the Increment to the stakeholders"
+        },
+        {
+          "id": "b",
+          "text": "To review the Product Backlog for dependencies"
+        },
+        {
+          "id": "c",
+          "text": "To plan ways to increase quality and effectiveness"
+        },
+        {
+          "id": "d",
+          "text": "To plan the work for the next Sprint"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-014",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "What is the purpose of the Sprint Review?",
+      "options": [
+        {
+          "id": "a",
+          "text": "To evaluate the performance of individual Developers"
+        },
+        {
+          "id": "b",
+          "text": "To inspect the outcome of the Sprint and determine future adaptations"
+        },
+        {
+          "id": "c",
+          "text": "To plan the work for the next Sprint"
+        },
+        {
+          "id": "d",
+          "text": "To obtain formal sign-off from the Scrum Master"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "b"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-015",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which of the empirical Scrum pillars requires the process and the work to be visible to those performing it and those receiving it?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Commitment"
+        },
+        {
+          "id": "b",
+          "text": "Transparency"
+        },
+        {
+          "id": "c",
+          "text": "Adaptation"
+        },
+        {
+          "id": "d",
+          "text": "Inspection"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "b"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-016",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Hard",
+    "content": {
+      "text": "Several Scrum Teams work together on one product. What does the Scrum Guide say about the Definition of Done?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Scrum Master of the largest team defines it for everyone"
+        },
+        {
+          "id": "b",
+          "text": "A Definition of Done is not needed when teams work together"
+        },
+        {
+          "id": "c",
+          "text": "Each team keeps its own and the results are merged at release"
+        },
+        {
+          "id": "d",
+          "text": "They must mutually define and comply with the same Definition of Done"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-017",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "According to the Scrum Guide, what is the typical size of a Scrum Team?",
+      "options": [
+        {
+          "id": "a",
+          "text": "Ten or fewer people"
+        },
+        {
+          "id": "b",
+          "text": "Fifteen or fewer people"
+        },
+        {
+          "id": "c",
+          "text": "Seven people exactly"
+        },
+        {
+          "id": "d",
+          "text": "Five people exactly"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-018",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Which statement about the Product Owner is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "The Product Owner is one person, not a committee"
+        },
+        {
+          "id": "b",
+          "text": "The Product Owner role rotates between Developers each Sprint"
+        },
+        {
+          "id": "c",
+          "text": "The Product Owner is a committee that represents the stakeholders"
+        },
+        {
+          "id": "d",
+          "text": "The Product Owner assigns tasks to individual Developers"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-019",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Which statement about Product Backlog refinement is correct?",
+      "options": [
+        {
+          "id": "a",
+          "text": "It is a formal Scrum event held at the end of every Sprint"
+        },
+        {
+          "id": "b",
+          "text": "It is performed only by the Scrum Master"
+        },
+        {
+          "id": "c",
+          "text": "It is an ongoing activity to add details such as description, order, and size"
+        },
+        {
+          "id": "d",
+          "text": "It must be finished before any Sprint can start"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-020",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Who adapts the Sprint Backlog during the Sprint as more is learned?",
+      "options": [
+        {
+          "id": "a",
+          "text": "No one, because it is frozen at Sprint Planning"
+        },
+        {
+          "id": "b",
+          "text": "Only the Product Owner"
+        },
+        {
+          "id": "c",
+          "text": "Only the Scrum Master"
+        },
+        {
+          "id": "d",
+          "text": "The Developers"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-021",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which of these are part of the Scrum Team? (Select all that apply)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Product Owner"
+        },
+        {
+          "id": "b",
+          "text": "Scrum Master"
+        },
+        {
+          "id": "c",
+          "text": "Release Manager"
+        },
+        {
+          "id": "d",
+          "text": "Project Manager"
+        },
+        {
+          "id": "e",
+          "text": "Developers"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a",
+        "b",
+        "e"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-022",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which of these are empirical Scrum pillars? (Select all that apply)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Transparency"
+        },
+        {
+          "id": "b",
+          "text": "Velocity"
+        },
+        {
+          "id": "c",
+          "text": "Estimation"
+        },
+        {
+          "id": "d",
+          "text": "Inspection"
+        },
+        {
+          "id": "e",
+          "text": "Adaptation"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a",
+        "d",
+        "e"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-023",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Which of these are Scrum events? (Select all that apply)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Daily Scrum"
+        },
+        {
+          "id": "b",
+          "text": "Weekly Status Meeting"
+        },
+        {
+          "id": "c",
+          "text": "Sprint Retrospective"
+        },
+        {
+          "id": "d",
+          "text": "Sprint Planning"
+        },
+        {
+          "id": "e",
+          "text": "Release Planning Workshop"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "a",
+        "c",
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-024",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Which of these are Scrum artifacts? (Select all that apply)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Status Report"
+        },
+        {
+          "id": "b",
+          "text": "Gantt Chart"
+        },
+        {
+          "id": "c",
+          "text": "Product Backlog"
+        },
+        {
+          "id": "d",
+          "text": "Sprint Backlog"
+        },
+        {
+          "id": "e",
+          "text": "Increment"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "c",
+        "d",
+        "e"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-025",
+    "answerType": "MULTIPLE_CHOICE",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "Which topics does Sprint Planning address? (Select all that apply)",
+      "options": [
+        {
+          "id": "a",
+          "text": "Which Developer will the Scrum Master assign to each task?"
+        },
+        {
+          "id": "b",
+          "text": "What can be Done this Sprint?"
+        },
+        {
+          "id": "c",
+          "text": "Why is this Sprint valuable?"
+        },
+        {
+          "id": "d",
+          "text": "How will the chosen work get done?"
+        }
+      ]
+    },
+    "answerKey": {
+      "correctOptionIds": [
+        "b",
+        "c",
+        "d"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-026",
+    "answerType": "SHORT_ANSWER",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "How many minutes is the timebox of the Daily Scrum?"
+    },
+    "answerKey": {
+      "acceptedAnswers": [
+        "15",
+        "15 minutes",
+        "fifteen",
+        "fifteen minutes"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-027",
+    "answerType": "SHORT_ANSWER",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which Scrum artifact has the Product Goal as its commitment?"
+    },
+    "answerKey": {
+      "acceptedAnswers": [
+        "Product Backlog",
+        "the Product Backlog"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-028",
+    "answerType": "SHORT_ANSWER",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "How many Scrum values are there?"
+    },
+    "answerKey": {
+      "acceptedAnswers": [
+        "5",
+        "five"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-029",
+    "answerType": "SHORT_ANSWER",
+    "category": "PSM",
+    "difficulty": "Easy",
+    "content": {
+      "text": "Which role is accountable for ordering the Product Backlog items?"
+    },
+    "answerKey": {
+      "acceptedAnswers": [
+        "Product Owner",
+        "the Product Owner"
+      ]
+    }
+  },
+  {
+    "seedId": "scrum-030",
+    "answerType": "SHORT_ANSWER",
+    "category": "PSM",
+    "difficulty": "Medium",
+    "content": {
+      "text": "What is the maximum number of hours for Sprint Planning in a one-month Sprint?"
+    },
+    "answerKey": {
+      "acceptedAnswers": [
+        "8",
+        "8 hours",
+        "eight",
+        "eight hours"
+      ]
+    }
+  }
+]

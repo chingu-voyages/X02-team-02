@@ -80,6 +80,29 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 
 ---
 
+## Seed sample questions
+
+Load 30 sample Scrum questions so the question list, and soon the practice quiz, have content to work with. Run this after the database migrations:
+
+```bash
+pnpm --filter @x02/server seed
+```
+
+Inside Docker, use:
+
+```bash
+docker compose exec server pnpm --filter @x02/server seed
+```
+
+- It is safe to run more than once. Re-running updates the same questions and does not create duplicates.
+- Every seeded question is `APPROVED`, in the `PSM` category, and authored by a `seed-author` account that cannot be logged into.
+- To change or add questions, edit `server/src/seed/sample-questions.json` (each entry needs a unique `seedId`) and run the server tests. Seeding overwrites question text with the file's version, so don't edit seeded questions directly in the database.
+- If any entry is invalid, nothing is written and the script prints what is wrong.
+
+The sample questions are original. They are based on concepts from the [Scrum Guide](https://scrumguides.org/scrum-guide.html) by Ken Schwaber and Jeff Sutherland, which is published under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). None of them come from a certification provider's assessments.
+
+---
+
 ## System Architecture
 
 WIP
