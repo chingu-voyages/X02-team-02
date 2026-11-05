@@ -49,7 +49,7 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-3">
       <div>
         <label htmlFor="email" className="label">
           Email
@@ -61,6 +61,7 @@ export default function LoginForm() {
           aria-invalid={!!errors.email}
           aria-describedby="email-error"
           className="field focus-ring"
+          placeholder="example@domain.com"
         />
         {errors?.email && (
           <p
@@ -105,7 +106,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-md border px-4 py-2 font-medium border-line-strong bg-page text-fg hover:bg-surface focus-ring"
+        className="w-full btn-primary focus-ring mt-3"
       >
         Login
       </button>

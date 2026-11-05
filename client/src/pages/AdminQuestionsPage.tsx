@@ -98,7 +98,7 @@ export default function AdminQuestionsPage() {
 
         <Link
           to="/admin/questions/new"
-          className="rounded-md border border-accent-line bg-accent-soft px-4 py-2 text-sm font-medium text-accent-fg hover:bg-accent-line/50 focus-ring"
+          className="btn-secondary text-sm focus-ring"
         >
           + New Question
         </Link>

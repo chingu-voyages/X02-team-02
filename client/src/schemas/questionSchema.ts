@@ -15,7 +15,7 @@ const multipleChoiceSchema = basefields.extend({
   options: z
     .array(optionSchema)
     .min(2, "Add at least 2 answer options")
-    .max(4, "At most 10 answer options")
+    .max(10, "At most 10 answer options")
     .refine((opts) => opts.some((o) => o.isCorrect), {
       message: "Tick at least one correct option",
     }),
