@@ -8,7 +8,7 @@
     "dev:server": "pnpm --filter @x02/server dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "test": "vitest run",
+    "test": "pnpm -r test",
     "format": "prettier --write ."
   },
   "keywords": [],

@@ -80,6 +80,71 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 
 ---
 
+## Seed sample questions
+
+Load 30 sample Scrum questions so the question list, and soon the practice quiz, have content to work with. Run this after the database migrations:
+
+```bash
+pnpm --filter @x02/server seed
+```
+
+Inside Docker, use:
+
+```bash
+docker compose exec server pnpm --filter @x02/server seed
+```
+
+- It is safe to run more than once. Re-running updates the same questions and does not create duplicates.
+- Every seeded question is `APPROVED`, in the `PSM` category, and authored by a `seed-author` account that cannot be logged into.
+- To change or add questions, edit `server/src/seed/sample-questions.json` (each entry needs a unique `seedId`) and run the server tests. Seeding overwrites question text with the file's version, so don't edit seeded questions directly in the database.
+- If any entry is invalid, nothing is written and the script prints what is wrong.
+
+The sample questions are original. They are based on concepts from the [Scrum Guide](https://scrumguides.org/scrum-guide.html) by Ken Schwaber and Jeff Sutherland, which is published under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). None of them come from a certification provider's assessments.
+
+---
+
+## Practice quiz demo
+
+A public demo of the quiz: 20 random seeded questions, one at a time, with a score and the correct answers at the end. No login needed.
+
+### Demo on your own computer (for example over a screen share)
+
+```bash
+docker compose up -d --build
+```
+
+```bash
+docker compose exec server pnpm --filter @x02/server exec prisma migrate deploy
+```
+
+```bash
+docker compose exec server pnpm --filter @x02/server seed
+```
+
+Then open http://localhost:5173/practice-exam and click **Start quiz**.
+
+### Share a link with a tunnel
+
+A tunnel gives your local app a temporary public web address, so someone else can open it on their own computer. With the app running as above, install [cloudflared](https://github.com/cloudflare/cloudflared/releases) (on macOS: `brew install cloudflared`) and run:
+
+```bash
+cloudflared tunnel --url http://localhost:5173
+```
+
+It prints an address like `https://something-random.trycloudflare.com`. Share that address followed by `/practice-exam`.
+
+- It only works while your computer, Docker, and the tunnel are all running, and the address changes every time you start it.
+- The tunnel exposes the **whole local app** (registration and the question pages too), not just the quiz. Share the link only with people you trust, and press `Ctrl+C` to close the tunnel when you are done.
+- The dev server only accepts tunnel addresses from `trycloudflare.com`, `ngrok-free.app`, `ngrok.app`, and `loca.lt`. For another tunnel service, add its domain to `allowedHosts` in `client/vite.config.ts`.
+
+### Turning the quiz on and off
+
+The quiz is on by default in development and **off in production**: with `NODE_ENV=production` the `/api/practice/*` routes answer 404. Set `ENABLE_PUBLIC_PRACTICE=true` to turn it on anyway, or `ENABLE_PUBLIC_PRACTICE=false` to turn it off in development.
+
+This version keeps no history: answers stay in the browser until the end, and nothing is saved.
+
+---
+
 ## System Architecture
 
 WIP

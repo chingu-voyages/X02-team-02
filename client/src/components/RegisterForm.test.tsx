@@ -1,0 +1,128 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import RegisterForm from "./RegisterForm.tsx";
+import { register } from "../api/auth.ts";
+import { ApiError } from "../api/client.ts";
+import userEvent from "@testing-library/user-event";
+import { waitFor } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
+import { useAuth } from "../auth/useAuth.ts";
+
+vi.mock("../api/auth.ts", () => ({ register: vi.fn() }));
+vi.mock("../auth/useAuth.ts", () => ({ useAuth: vi.fn() }));
+
+const mockRegister = vi.mocked(register);
+const mockUseAuth = vi.mocked(useAuth);
+
+describe("RegisterForm", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: null,
+      status: "anonymous",
+      login: vi.fn(),
+      logout: vi.fn(),
+    });
+  });
+
+  it("renders all fields and the submit button", () => {
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByLabelText("Username")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Password", { exact: true }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Confirm password")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /register/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("submits valid data without confirmPassword", async () => {
+    mockRegister.mockResolvedValue({
+      user: {
+        id: "123",
+        username: "test",
+        email: "test@example.com",
+        role: "LEARNER",
+      },
+    });
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText("Username"), "test");
+    await user.type(screen.getByLabelText("Email"), "test@example.com");
+    await user.type(
+      screen.getByLabelText("Password", { exact: true }),
+      "Password1!",
+    );
+    await user.type(screen.getByLabelText("Confirm password"), "Password1!");
+    await user.click(screen.getByRole("button", { name: /register/i }));
+
+    await waitFor(() => expect(mockRegister).toHaveBeenCalledTimes(1));
+    expect(mockRegister).toHaveBeenCalledWith({
+      username: "test",
+      email: "test@example.com",
+      password: "Password1!",
+    });
+  });
+
+  it("displays an error when email already exists", async () => {
+    mockRegister.mockRejectedValue(
+      new ApiError(409, "An account with this email already exists."),
+    );
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText("Username"), "test");
+    await user.type(screen.getByLabelText("Email"), "test@example.com");
+    await user.type(
+      screen.getByLabelText("Password", { exact: true }),
+      "Password1!",
+    );
+    await user.type(screen.getByLabelText("Confirm password"), "Password1!");
+    await user.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "An account with this email already exists.",
+    );
+    expect(mockRegister).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("displays an error when passwords don't match", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <RegisterForm />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText("Username"), "test");
+    await user.type(screen.getByLabelText("Email"), "test@example.com");
+    await user.type(
+      screen.getByLabelText("Password", { exact: true }),
+      "Password1!",
+    );
+    await user.type(screen.getByLabelText("Confirm password"), "password1!");
+    await user.click(screen.getByRole("button", { name: /register/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Passwords don't match",
+    );
+    expect(mockRegister).not.toHaveBeenCalled();
+  });
+});
