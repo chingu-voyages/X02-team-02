@@ -14,8 +14,8 @@ export async function createSession(userId: string) {
   return { id, expiresAt };
 }
 
-// Returns the logged-in user, or null when the session is missing or expired.
-// Expired rows are deleted here, so they only linger until someone uses them.
+// Returns the logged-in user, or null when the session is missing,
+// expired, or belongs to a blocked account.
 export async function getSessionUser(sessionId: string) {
   const session = await prisma.session.findUnique({
     where: { id: sessionId },
@@ -39,6 +39,15 @@ export async function getSessionUser(sessionId: string) {
 
   if (session.expiresAt <= new Date()) {
     await prisma.session.deleteMany({ where: { id: sessionId } });
+    return null;
+  }
+
+  if (session.user.status === "BLOCKED") {
+    // Revoke every session belonging to this blocked account.
+    await prisma.session.deleteMany({
+      where: { userId: session.user.id },
+    });
+
     return null;
   }
 

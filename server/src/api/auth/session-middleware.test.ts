@@ -103,5 +103,21 @@ describe("Session middleware", () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ ok: true });
     });
+
+    it("denies protected API requests from users with blocked accounts", async () => {
+      // getSessionUser returns null for a blocked account.
+      mockGetSessionUser.mockResolvedValue(null);
+    
+      const response = await request(buildApp())
+        .get("/private")
+        .set("Cookie", "sid=blocked-session");
+    
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: "Authentication required.",
+      });
+    
+      expect(mockGetSessionUser).toHaveBeenCalledWith("blocked-session");
+    });
   });
 });
