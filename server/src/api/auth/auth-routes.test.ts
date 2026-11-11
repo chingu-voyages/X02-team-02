@@ -271,6 +271,7 @@ describe("Auth routes", () => {
       email: "testuser@example.com",
       role: "LEARNER",
       passwordHash: "stored-password-hash",
+      status: "ACTIVE",
     };
 
     it("returns 200, creates a session, and sets the session cookie", async () => {
@@ -300,6 +301,7 @@ describe("Auth routes", () => {
           email: true,
           role: true,
           passwordHash: true,
+          status: true,
         },
       });
 
@@ -383,6 +385,26 @@ describe("Auth routes", () => {
       expect(mockFindUnique).not.toHaveBeenCalled();
       expect(mockVerifyPassword).not.toHaveBeenCalled();
       expect(mockSessionCreate).not.toHaveBeenCalled();
+    });
+
+    it("returns the generic 401 response and does not create a session for blocked users", async () => {
+      mockFindUnique.mockResolvedValue({
+        ...storedUser,
+        status: "BLOCKED",
+      });
+    
+      const response = await request(app)
+        .post("/api/auth/login")
+        .send(credentials);
+    
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: "Invalid email or password",
+      });
+    
+      expect(mockVerifyPassword).not.toHaveBeenCalled();
+      expect(mockSessionCreate).not.toHaveBeenCalled();
+      expect(response.headers["set-cookie"]).toBeUndefined();
     });
   });
 });

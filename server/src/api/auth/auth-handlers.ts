@@ -37,10 +37,11 @@ export async function login(
         email: true,
         role: true,
         passwordHash: true,
+        status: true,
       },
     });
 
-    if (!user) {
+    if (!user || user.status === "BLOCKED") {
       res.status(401).json(INVALID_CREDENTIALS);
       return;
     }
