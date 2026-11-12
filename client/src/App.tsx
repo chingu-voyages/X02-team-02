@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AuthProvider } from "./auth/AuthProvider.tsx";
 import { RequireAuth } from "./auth/RequireAuth.tsx";
+import { RequireRole } from "./auth/RequireRole.tsx";
 import Layout from "./pages/Layout.tsx";
 import AdminQuestionsPage from "./pages/AdminQuestionsPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
@@ -17,13 +18,26 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          {/* Public demo quiz: no login needed. */}
-          <Route path="/practice-exam" element={<PracticeExamPage />} />
 
+          {/* Public demo quiz: no login needed. */}
+          <Route
+            path="/practice-exam"
+            element={<PracticeExamPage />}
+          />
+
+          {/* All admin routes require authentication and ADMIN role. */}
           <Route element={<RequireAuth />}>
-            <Route path="/admin" element={<Layout />}>
-              <Route path="questions" element={<AdminQuestionsPage />} />
-              <Route path="questions/new" element={<NewQuestionPage />} />
+            <Route element={<RequireRole allowedRoles={["ADMIN"]} />}>
+              <Route path="/admin" element={<Layout />}>
+                <Route
+                  path="questions"
+                  element={<AdminQuestionsPage />}
+                />
+                <Route
+                  path="questions/new"
+                  element={<NewQuestionPage />}
+                />
+              </Route>
             </Route>
           </Route>
 
