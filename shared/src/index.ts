@@ -68,7 +68,8 @@ export type {
 export { startExamRequestSchema } from "./schemas/exam.js";
 
 export type {
+  GetCategoriesResponse,
   StartExamRequest,
-  ExamQuestion,
   StartExamResponse,
+  ExamQuestion,
 } from "./schemas/exam.js";

@@ -34,3 +34,8 @@ export type StartExamResponse = {
   resumed: boolean;
   questions: ExamQuestion[];
 };
+
+// Response of GET /api/exams/categories
+export type GetCategoriesResponse = {
+  categories: string[];
+};
