@@ -7,7 +7,7 @@ import { useAuth } from "../auth/useAuth.ts";
 import { useNavigate } from "react-router";
 
 export default function LoginForm() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -28,7 +28,9 @@ export default function LoginForm() {
     try {
       await login(request);
       // TODO: navigate to different route later
-      navigate("/admin/questions");
+      if (user?.role === "LEARNER") {
+        navigate("/");
+      } else navigate("/admin/questions");
     } catch (error) {
       console.log(error);
       if (error instanceof ApiError) {

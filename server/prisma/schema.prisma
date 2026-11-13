@@ -39,6 +39,7 @@ model User {
 
   questionsAuthored    Question[]           @relation("QuestionAuthor")
   questionsReviewed    Question[]           @relation("QuestionReviewer")
+  attempts             Attempt[]
 
   sessions             Session[]
 
@@ -100,8 +101,45 @@ model Question {
 
   reviewedBy           User?                @relation("QuestionReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
 
+  attemptQuestions     AttemptQuestion[]
+
   @@index([authorId])
   @@index([reviewStatus, category])
   @@index([reviewedById])
   @@map("questions")
+}
+
+model Attempt {
+  id                   String               @id @default(uuid()) @db.Uuid
+  startedAt            DateTime             @default(now()) @map("started_at")
+  finishedAt           DateTime?            @map("finished_at")
+  score                Int?
+  category             String               @db.VarChar(100)
+
+  userId               String               @map("user_id") @db.Uuid
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions            AttemptQuestion[]
+
+  @@index([userId, finishedAt])
+  @@map("attempts")
+}
+
+model AttemptQuestion {
+  id                   String               @id @default(uuid()) @db.Uuid
+  position             Int
+  content              Json                 @db.JsonB
+  answerType           QuestionAnswerType   @map("answer_type")
+  answerKey            Json                 @map("answer_key") @db.JsonB
+  answer               Json?                @db.JsonB
+  isCorrect            Boolean?             @map("is_correct")
+
+  attemptId            String               @map("attempt_id") @db.Uuid
+  attempt              Attempt              @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  questionId           String               @map("question_id") @db.Uuid
+  question             Question             @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([attemptId, position])
+  @@index([questionId])
+  @@map("attempt_questions")
 }

@@ -49,13 +49,9 @@ export type ValidationErrorResponse = ErrorResponse & {
   fieldErrors: FieldError[];
 };
 
-export {
-  createQuestionSchema,
-} from "./schemas/question.js";
+export { createQuestionSchema } from "./schemas/question.js";
 
-export type {
-  CreateQuestionInput,
-} from "./schemas/question.js";
+export type { CreateQuestionInput } from "./schemas/question.js";
 
 export { practiceGradeRequestSchema } from "./practice.js";
 
@@ -68,3 +64,12 @@ export type {
   PracticeQuestionsResponse,
   PracticeResult,
 } from "./practice.js";
+
+export { startExamRequestSchema } from "./schemas/exam.js";
+
+export type {
+  GetCategoriesResponse,
+  StartExamRequest,
+  StartExamResponse,
+  ExamQuestion,
+} from "./schemas/exam.js";
