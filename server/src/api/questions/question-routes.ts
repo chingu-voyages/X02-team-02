@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { requireAuth } from "../auth/session-middleware.js";
+import {
+  requireAuth,
+  requireRole,
+} from "../auth/session-middleware.js";
 import {
   createQuestion,
   loadQuestions,
@@ -7,7 +10,10 @@ import {
 
 const questionRoutes = Router();
 
-questionRoutes.get("/", requireAuth, loadQuestions);
+// The admin question-management page is restricted to administrators.
+questionRoutes.get("/", requireRole("ADMIN"), loadQuestions);
+
+// Authenticated users of any role may submit questions.
 questionRoutes.post("/create", requireAuth, createQuestion);
 
 export default questionRoutes;
