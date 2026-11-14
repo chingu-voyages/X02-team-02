@@ -11,6 +11,7 @@ import NewQuestionPage from "./pages/NewQuestionPage.tsx";
 import PracticeExamPage from "./pages/PracticeExamPage.tsx";
 import ExamCategoriesPage from "./pages/ExamCategoriesPage.tsx";
 import ExamIntroPage from "./pages/ExamIntroPage.tsx";
+import ExamPage from "./pages/ExamPage.tsx";
 
 export default function App() {
   return (
@@ -35,14 +36,12 @@ export default function App() {
 
             {/* Learner routes */}
             <Route element={<Layout />}>
-              <Route
-                path="/exams/categories"
-                element={<ExamCategoriesPage />}
-              />
+              <Route path="/exams" element={<ExamCategoriesPage />} />
               <Route
                 path="/exams/:category/start"
                 element={<ExamIntroPage />}
               />
+              <Route path="/exams/:attemptId" element={<ExamPage />} />
             </Route>
           </Route>
 
