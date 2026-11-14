@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router";
 import { ApiError } from "../api/client.ts";
 import { startExam } from "../api/exams.ts";
 
 export default function ExamIntroPage() {
   const { category } = useParams<{ category: string }>();
-  //   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [isStarting, setIsStarting] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -21,9 +21,9 @@ export default function ExamIntroPage() {
 
     try {
       const response = await startExam(category);
-      // exam screen doesn't exist yet, console log for now
+      // TODO: delete console.log once questions are displayed
       console.log(response);
-      // LATER: navigate(`/exams/${response.attemptId}`);
+      navigate(`/exams/${response.attemptId}`);
     } catch (error) {
       setMessage(
         error instanceof ApiError && error.status === 404
@@ -60,7 +60,7 @@ export default function ExamIntroPage() {
         >
           {isStarting ? "Starting..." : "Begin exam"}
         </button>
-        <Link to="/exams/categories" className="btn-secondary">
+        <Link to="/exams" className="btn-secondary">
           Back to exams
         </Link>
       </div>

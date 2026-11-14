@@ -169,5 +169,30 @@ describe("Exam handlers", () => {
       expect(sent).not.toContain("answerKey");
       expect(sent).not.toContain("correctOptionIds");
     });
+
+    it("only picks approved questions of the chosen category", async () => {
+      mockAttemptFindFirst.mockResolvedValue(null);
+      mockQuestionFindMany
+        .mockResolvedValueOnce([{ id: questionId }])
+        .mockResolvedValueOnce([storedQuestion]);
+      mockAttemptCreate.mockResolvedValue({
+        id: "attempt-3",
+        questions: [{ ...storedQuestion, id: "row-1", position: 1 }],
+      });
+      const { req, res } = createMocks({ body: { category: "PSM" } });
+
+      await startExam(req, res);
+
+      expect(mockQuestionFindMany).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          where: expect.objectContaining({
+            reviewStatus: "APPROVED",
+            category: "PSM",
+            answerType: { in: ["MULTIPLE_CHOICE", "SHORT_ANSWER"] },
+          }),
+        }),
+      );
+    });
   });
 });
