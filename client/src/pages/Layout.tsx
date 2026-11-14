@@ -4,6 +4,7 @@ import { useAuth } from "../auth/useAuth.ts";
 
 const adminLinks = [
   { label: "Dashboard", to: "#", end: true },
+  { label: "Exams", to: "/exams", end: true },
   { label: "Questions", to: "/admin/questions", end: false },
   { label: "Users", to: "#", end: false },
   { label: "Reports", to: "#", end: false },
