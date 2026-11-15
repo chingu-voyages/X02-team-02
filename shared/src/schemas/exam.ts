@@ -32,10 +32,18 @@ export type ExamQuestion =
 export type StartExamResponse = {
   attemptId: string;
   resumed: boolean;
-  questions: ExamQuestion[];
 };
 
 // Response of GET /api/exams/categories
 export type GetCategoriesResponse = {
   categories: string[];
 };
+
+// Response of GET /api/exams/:attemptId
+export type GetExamResponse = {
+  attemptId: string;
+  category: string;
+  questions: ExamQuestion[];
+};
+
+export const attemptIdSchema = z.uuid();
