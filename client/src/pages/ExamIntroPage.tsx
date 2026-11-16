@@ -23,7 +23,7 @@ export default function ExamIntroPage() {
       const response = await startExam(category);
       // TODO: delete console.log once questions are displayed
       console.log(response);
-      navigate(`/exams/${response.attemptId}`);
+      navigate(`/exams/${response.attemptId}/questions/1`);
     } catch (error) {
       setMessage(
         error instanceof ApiError && error.status === 404

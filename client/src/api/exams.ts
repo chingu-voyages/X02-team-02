@@ -1,4 +1,8 @@
-import type { GetCategoriesResponse, StartExamResponse } from "@x02/shared";
+import type {
+  GetCategoriesResponse,
+  StartExamResponse,
+  GetExamResponse,
+} from "@x02/shared";
 import { apiFetch } from "./client.ts";
 
 export function getExamCategories() {
@@ -10,4 +14,8 @@ export function startExam(category: string) {
     method: "POST",
     body: { category },
   });
+}
+
+export function getExam(attemptId: string) {
+  return apiFetch<GetExamResponse>(`/exams/${attemptId}`);
 }

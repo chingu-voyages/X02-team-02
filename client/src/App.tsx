@@ -12,6 +12,7 @@ import PracticeExamPage from "./pages/PracticeExamPage.tsx";
 import ExamCategoriesPage from "./pages/ExamCategoriesPage.tsx";
 import ExamIntroPage from "./pages/ExamIntroPage.tsx";
 import ExamPage from "./pages/ExamPage.tsx";
+import ExamRedirect from "./components/ExamRedirect.tsx";
 
 export default function App() {
   return (
@@ -41,7 +42,11 @@ export default function App() {
                 path="/exams/:category/start"
                 element={<ExamIntroPage />}
               />
-              <Route path="/exams/:attemptId" element={<ExamPage />} />
+              <Route
+                path="/exams/:attemptId/questions/:position"
+                element={<ExamPage />}
+              />
+              <Route path="/exams/:attemptId" element={<ExamRedirect />} />
             </Route>
           </Route>
 
