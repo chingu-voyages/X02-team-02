@@ -1,9 +1,12 @@
 import { z } from "zod";
 import type { PracticeOption } from "../practice";
 
+export const MAX_EXAM_QUESTION_COUNT = 50;
+
 export const startExamRequestSchema = z
   .object({
     category: z.string().trim().min(1).max(100),
+    count: z.number().int().min(1).max(MAX_EXAM_QUESTION_COUNT).optional(),
   })
   .strict();
 
@@ -32,10 +35,18 @@ export type ExamQuestion =
 export type StartExamResponse = {
   attemptId: string;
   resumed: boolean;
-  questions: ExamQuestion[];
 };
 
 // Response of GET /api/exams/categories
 export type GetCategoriesResponse = {
   categories: string[];
 };
+
+// Response of GET /api/exams/:attemptId
+export type GetExamResponse = {
+  attemptId: string;
+  category: string;
+  questions: ExamQuestion[];
+};
+
+export const attemptIdSchema = z.uuid();

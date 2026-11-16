@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "../../db/prisma.js";
-import { startExamRequestSchema, type ExamQuestion } from "@x02/shared";
+import { startExamRequestSchema, attemptIdSchema } from "@x02/shared";
+import type { ExamQuestion } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
 import type {
   AttemptQuestion,
@@ -12,6 +13,7 @@ type NewAttemptQuestion =
   Prisma.AttemptQuestionUncheckedCreateWithoutAttemptInput;
 const EXAM_QUESTION_COUNT = 20;
 
+// Get all categories of APPROVED & GRADABLE_TYPES
 export async function getCategories(
   _req: Request,
   res: Response,
@@ -37,44 +39,9 @@ export async function getCategories(
   }
 }
 
-// map over fetched attempt questions and exclude answers
-function toExamQuestions(
-  rows: AttemptQuestion[],
-  category: string,
-): ExamQuestion[] {
-  const questions: ExamQuestion[] = [];
-
-  for (const row of rows) {
-    const question = parseStoredQuestion({
-      answerType: row.answerType,
-      content: row.content,
-      answerKey: row.answerKey,
-      category,
-    });
-    if (!question) continue;
-
-    if (question.answerType === "MULTIPLE_CHOICE") {
-      questions.push({
-        id: row.id,
-        position: row.position,
-        answerType: "MULTIPLE_CHOICE",
-        text: question.content.text,
-        options: question.content.options,
-        multiple: question.answerKey.correctOptionIds.length > 1,
-      });
-    } else {
-      questions.push({
-        id: row.id,
-        position: row.position,
-        answerType: "SHORT_ANSWER",
-        text: question.content.text,
-      });
-    }
-  }
-
-  return questions;
-}
-
+// Create new exam attempt and attempt questions
+// or return existing one of the same category
+// (count only applies when new attempt is created)
 export async function startExam(req: Request, res: Response): Promise<void> {
   if (!req.user) {
     res.status(401).json({ error: "Authentication required." });
@@ -103,7 +70,7 @@ export async function startExam(req: Request, res: Response): Promise<void> {
     return;
   }
 
-  const { category } = body.data;
+  const { category, count } = body.data;
 
   try {
     // check if an unfinished attempt of the same category already exists
@@ -113,7 +80,6 @@ export async function startExam(req: Request, res: Response): Promise<void> {
         userId: user.id,
         finishedAt: null,
       },
-      include: { questions: { orderBy: { position: "asc" } } },
     });
 
     // return the unfinished attempt instead of starting a new one
@@ -121,7 +87,6 @@ export async function startExam(req: Request, res: Response): Promise<void> {
       res.status(200).json({
         attemptId: existingAttempt.id,
         resumed: true,
-        questions: toExamQuestions(existingAttempt.questions, category),
       });
       return;
     }
@@ -146,10 +111,10 @@ export async function startExam(req: Request, res: Response): Promise<void> {
     // shuffle Ids and limit the length
     const chosenIds = shuffle(candidates.map((row) => row.id)).slice(
       0,
-      EXAM_QUESTION_COUNT,
+      count ?? EXAM_QUESTION_COUNT,
     );
 
-    // get selected question fields for chosen Ids and save in a Map
+    // get selected question fields for chosen Ids and save in a map
     const rows = await prisma.question.findMany({
       where: { id: { in: chosenIds } },
       select: {
@@ -209,19 +174,99 @@ export async function startExam(req: Request, res: Response): Promise<void> {
         userId: user.id,
         questions: { create: attemptQuestions },
       },
-      include: { questions: { orderBy: { position: "asc" } } },
     });
 
-    res
-      .status(201)
-      .json({
-        attemptId: attempt.id,
-        resumed: false,
-        questions: toExamQuestions(attempt.questions, category),
-      });
+    res.status(201).json({
+      attemptId: attempt.id,
+      resumed: false,
+    });
   } catch (error) {
     console.error("Failed to load exam questions:", error);
 
     res.status(500).json({ error: "Unable to load exam questions." });
+  }
+}
+
+// Map over fetched attempt questions and exclude answers
+function toExamQuestions(
+  rows: AttemptQuestion[],
+  category: string,
+): ExamQuestion[] {
+  const questions: ExamQuestion[] = [];
+
+  for (const row of rows) {
+    const question = parseStoredQuestion({
+      answerType: row.answerType,
+      content: row.content,
+      answerKey: row.answerKey,
+      category,
+    });
+    if (!question) continue;
+
+    if (question.answerType === "MULTIPLE_CHOICE") {
+      questions.push({
+        id: row.id,
+        position: row.position,
+        answerType: "MULTIPLE_CHOICE",
+        text: question.content.text,
+        options: question.content.options,
+        multiple: question.answerKey.correctOptionIds.length > 1,
+      });
+    } else {
+      questions.push({
+        id: row.id,
+        position: row.position,
+        answerType: "SHORT_ANSWER",
+        text: question.content.text,
+      });
+    }
+  }
+
+  return questions;
+}
+
+// Fetch an exam
+export async function getExam(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  const attemptId = attemptIdSchema.safeParse(req.params.attemptId);
+
+  if (!attemptId.success) {
+    res.status(404).json({ error: "Attempt not found." });
+    return;
+  }
+
+  try {
+    const attempt = await prisma.attempt.findFirst({
+      where: { id: attemptId.data, userId: user.id },
+      include: { questions: { orderBy: { position: "asc" } } },
+    });
+
+    if (!attempt) {
+      res.status(404).json({ error: "Attempt not found." });
+      return;
+    }
+
+    res.status(200).json({
+      attemptId: attempt.id,
+      questions: toExamQuestions(attempt.questions, attempt.category),
+      category: attempt.category,
+    });
+  } catch (error) {
+    console.error("Failed to load exam attempt.", error);
+
+    res.status(500).json({ error: "Unable to load exam attempt." });
   }
 }

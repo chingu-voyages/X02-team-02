@@ -65,11 +65,16 @@ export type {
   PracticeResult,
 } from "./practice.js";
 
-export { startExamRequestSchema } from "./schemas/exam.js";
+export {
+  startExamRequestSchema,
+  attemptIdSchema,
+  MAX_EXAM_QUESTION_COUNT,
+} from "./schemas/exam.js";
 
 export type {
   GetCategoriesResponse,
   StartExamRequest,
   StartExamResponse,
   ExamQuestion,
+  GetExamResponse,
 } from "./schemas/exam.js";
