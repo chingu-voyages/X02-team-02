@@ -9,10 +9,10 @@ export function getExamCategories() {
   return apiFetch<GetCategoriesResponse>("/exams/categories");
 }
 
-export function startExam(category: string) {
+export function startExam(category: string, count?: number) {
   return apiFetch<StartExamResponse>("/exams", {
     method: "POST",
-    body: { category },
+    body: { category, count },
   });
 }
 

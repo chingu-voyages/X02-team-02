@@ -23,10 +23,10 @@ export default function ExamPage() {
   useEffect(() => {
     if (!attemptId) return;
 
-    setMessage("");
-    setStatus("loading");
-
     async function loadAttempt(id: string) {
+      setMessage("");
+      setStatus("loading");
+
       try {
         const response = await getExam(id);
         setAttempt(response);
