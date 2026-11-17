@@ -1,10 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Navigate, useNavigate } from "react-router";
-import type {
-  GetExamResponse,
-  PracticeQuestion,
-  ExamQuestion,
-} from "@x02/shared";
+import type { GetExamResponse, ExamQuestion } from "@x02/shared";
 import { getExam, saveAnswer } from "../api/exams";
 import { ApiError } from "../api/client";
 import QuestionScreen from "../components/QuestionScreen";
