@@ -1,18 +1,34 @@
 import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getCategories, startExam, getExam } from "./exam-handlers.js";
+import {
+  getCategories,
+  startExam,
+  getExam,
+  saveAnswer,
+} from "./exam-handlers.js";
 
-const { mockQuestionFindMany, mockAttemptFindFirst, mockAttemptCreate } =
-  vi.hoisted(() => ({
-    mockQuestionFindMany: vi.fn(),
-    mockAttemptFindFirst: vi.fn(),
-    mockAttemptCreate: vi.fn(),
-  }));
+const {
+  mockQuestionFindMany,
+  mockAttemptFindFirst,
+  mockAttemptCreate,
+  mockAttemptQuestionFindFirst,
+  mockAttemptQuestionUpdate,
+} = vi.hoisted(() => ({
+  mockQuestionFindMany: vi.fn(),
+  mockAttemptFindFirst: vi.fn(),
+  mockAttemptCreate: vi.fn(),
+  mockAttemptQuestionFindFirst: vi.fn(),
+  mockAttemptQuestionUpdate: vi.fn(),
+}));
 
 vi.mock("../../db/prisma.js", () => ({
   prisma: {
     question: { findMany: mockQuestionFindMany },
     attempt: { findFirst: mockAttemptFindFirst, create: mockAttemptCreate },
+    attemptQuestion: {
+      findFirst: mockAttemptQuestionFindFirst,
+      update: mockAttemptQuestionUpdate,
+    },
   },
 }));
 
@@ -58,6 +74,7 @@ function createMocks(
   const res = {
     status: vi.fn().mockReturnThis(),
     json: vi.fn().mockReturnThis(),
+    end: vi.fn().mockReturnThis(),
   } as unknown as Response;
 
   return { req, res };
@@ -302,6 +319,101 @@ describe("Exam handlers", () => {
 
       expect(res.status).toHaveBeenCalledWith(500);
       consoleError.mockRestore();
+    });
+  });
+
+  describe("saveAnswer", () => {
+    const attemptQuestionId = "7c9e6679-7425-40de-944b-e07fc1f90ae7";
+    const params = { attemptId, questionId: attemptQuestionId };
+
+    const foundRow = {
+      answerType: "MULTIPLE_CHOICE",
+      content: storedQuestion.content,
+      answerKey: storedQuestion.answerKey,
+      attempt: { finishedAt: null, category: "PSM" },
+    };
+
+    it("returns 401 when the user is not authenticated", async () => {
+      const { req, res } = createMocks({
+        user: undefined,
+        params,
+        body: { optionIds: ["a"] },
+      });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(mockAttemptQuestionFindFirst).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when the body has an unknown key", async () => {
+      const { req, res } = createMocks({ params, body: { admin: true } });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(mockAttemptQuestionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("returns 404 when the question is not found for this user", async () => {
+      mockAttemptQuestionFindFirst.mockResolvedValue(null);
+      const { req, res } = createMocks({ params, body: { optionIds: ["a"] } });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(mockAttemptQuestionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("returns 409 when the exam is already finished", async () => {
+      mockAttemptQuestionFindFirst.mockResolvedValue({
+        ...foundRow,
+        attempt: { finishedAt: new Date(), category: "PSM" },
+      });
+      const { req, res } = createMocks({ params, body: { optionIds: ["a"] } });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(mockAttemptQuestionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when text is sent to a multiple choice question", async () => {
+      mockAttemptQuestionFindFirst.mockResolvedValue(foundRow);
+      const { req, res } = createMocks({ params, body: { text: "hello" } });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(mockAttemptQuestionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 for an option id that does not exist", async () => {
+      mockAttemptQuestionFindFirst.mockResolvedValue(foundRow);
+      const { req, res } = createMocks({
+        params,
+        body: { optionIds: ["zzz"] },
+      });
+
+      await saveAnswer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(mockAttemptQuestionUpdate).not.toHaveBeenCalled();
+    });
+
+    it("saves a valid answer and returns 204", async () => {
+      mockAttemptQuestionFindFirst.mockResolvedValue(foundRow);
+      mockAttemptQuestionUpdate.mockResolvedValue({});
+      const { req, res } = createMocks({ params, body: { optionIds: ["a"] } });
+
+      await saveAnswer(req, res);
+
+      expect(mockAttemptQuestionUpdate).toHaveBeenCalledWith({
+        where: { id: attemptQuestionId },
+        data: { answer: { optionIds: ["a"] } },
+      });
+      expect(res.status).toHaveBeenCalledWith(204);
+      expect(res.end).toHaveBeenCalled();
     });
   });
 });
