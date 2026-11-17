@@ -69,6 +69,7 @@ export {
   startExamRequestSchema,
   attemptIdSchema,
   MAX_EXAM_QUESTION_COUNT,
+  saveAnswerRequestSchema,
 } from "./schemas/exam.js";
 
 export type {
@@ -77,4 +78,5 @@ export type {
   StartExamResponse,
   ExamQuestion,
   GetExamResponse,
+  SaveAnswerRequest,
 } from "./schemas/exam.js";

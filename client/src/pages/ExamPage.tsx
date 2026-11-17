@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, Navigate, useNavigate } from "react-router";
-import type { GetExamResponse, PracticeQuestion } from "@x02/shared";
-import { getExam } from "../api/exams";
+import type { GetExamResponse, ExamQuestion } from "@x02/shared";
+import { getExam, saveAnswer } from "../api/exams";
 import { ApiError } from "../api/client";
 import QuestionScreen from "../components/QuestionScreen";
 import type { Entry } from "../components/QuestionScreen";
@@ -29,6 +29,19 @@ export default function ExamPage() {
 
       try {
         const response = await getExam(id);
+
+        const loadedAnswers: Record<string, Entry> = {};
+
+        response.questions.forEach((q) => {
+          if (q.answer) {
+            const entry: Entry = q.answer.optionIds
+              ? { optionIds: q.answer.optionIds, text: "" }
+              : { optionIds: [], text: q.answer.text ?? "" };
+            loadedAnswers[q.id] = entry;
+          }
+        });
+
+        setEntries(loadedAnswers);
         setAttempt(response);
         setStatus("ready");
       } catch (error) {
@@ -54,16 +67,16 @@ export default function ExamPage() {
     (q) => q.position === Number(position),
   );
 
-  function entryFor(question: PracticeQuestion): Entry {
+  function entryFor(question: ExamQuestion): Entry {
     return entries[question.id] ?? { optionIds: [], text: "" };
   }
 
-  function setEntry(question: PracticeQuestion, entry: Entry) {
+  function setEntry(question: ExamQuestion, entry: Entry) {
     setEntries((prev) => ({ ...prev, [question.id]: entry }));
   }
 
   function chooseOption(
-    question: Extract<PracticeQuestion, { answerType: "MULTIPLE_CHOICE" }>,
+    question: Extract<ExamQuestion, { answerType: "MULTIPLE_CHOICE" }>,
     optionId: string,
   ) {
     const current = entryFor(question);
@@ -80,6 +93,24 @@ export default function ExamPage() {
     setEntry(question, { ...current, optionIds });
   }
 
+  async function saveCurrent(question: ExamQuestion) {
+    if (!attemptId) return false;
+
+    const answer = entryFor(question);
+    const body =
+      question.answerType === "MULTIPLE_CHOICE"
+        ? { optionIds: answer.optionIds }
+        : { text: answer.text };
+
+    try {
+      await saveAnswer(attemptId, question.id, body);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
   return (
     <section className="mx-auto max-w-2xl">
       {status === "loading" && <p role="status">Loading question...</p>}
@@ -94,10 +125,23 @@ export default function ExamPage() {
           position={question.position}
           total={attempt.questions.length}
           headingRef={headingRef}
-          onNext={() => {
+          message={message}
+          onNext={async () => {
+            setMessage("");
+            const saved = await saveCurrent(question);
+            if (!saved) {
+              setMessage("Could not save your answer");
+              return;
+            }
             navigate(`/exams/${attemptId}/questions/${Number(position) + 1}`);
           }}
-          onPrevious={() => {
+          onPrevious={async () => {
+            setMessage("");
+            const saved = await saveCurrent(question);
+            if (!saved) {
+              setMessage("Could not save your answer");
+              return;
+            }
             navigate(`/exams/${attemptId}/questions/${Number(position) - 1}`);
           }}
           onChooseOption={(optionId) => {

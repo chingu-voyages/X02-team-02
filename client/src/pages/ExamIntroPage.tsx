@@ -21,8 +21,6 @@ export default function ExamIntroPage() {
 
     try {
       const response = await startExam(category);
-      // TODO: delete console.log once questions are displayed
-      console.log(response);
       navigate(`/exams/${response.attemptId}/questions/1`);
     } catch (error) {
       setMessage(
