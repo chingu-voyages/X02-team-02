@@ -23,12 +23,14 @@ export type ExamQuestion =
       options: PracticeOption[];
       // True when more than one option is correct ("select all that apply").
       multiple: boolean;
+      answer?: SaveAnswerRequest;
     }
   | {
       id: string;
       position: number;
       answerType: "SHORT_ANSWER";
       text: string;
+      answer?: SaveAnswerRequest;
     };
 
 // Response of POST /api/exams
@@ -50,3 +52,12 @@ export type GetExamResponse = {
 };
 
 export const attemptIdSchema = z.uuid();
+
+export const saveAnswerRequestSchema = z
+  .object({
+    optionIds: z.array(z.string().min(1).max(50)).max(10).optional(),
+    text: z.string().max(1_000).optional(),
+  })
+  .strict();
+
+export type SaveAnswerRequest = z.infer<typeof saveAnswerRequestSchema>;

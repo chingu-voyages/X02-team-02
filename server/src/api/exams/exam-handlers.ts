@@ -1,12 +1,17 @@
 import type { Request, Response } from "express";
 import { prisma } from "../../db/prisma.js";
-import { startExamRequestSchema, attemptIdSchema } from "@x02/shared";
+import {
+  startExamRequestSchema,
+  attemptIdSchema,
+  saveAnswerRequestSchema,
+} from "@x02/shared";
 import type { ExamQuestion } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
 import type {
   AttemptQuestion,
   Prisma,
 } from "../../../generated/prisma/client.js";
+import { error } from "node:console";
 
 const GRADABLE_TYPES = ["MULTIPLE_CHOICE", "SHORT_ANSWER"] as const;
 type NewAttemptQuestion =
@@ -203,6 +208,8 @@ function toExamQuestions(
     });
     if (!question) continue;
 
+    const savedAnswer = saveAnswerRequestSchema.safeParse(row.answer);
+
     if (question.answerType === "MULTIPLE_CHOICE") {
       questions.push({
         id: row.id,
@@ -211,6 +218,7 @@ function toExamQuestions(
         text: question.content.text,
         options: question.content.options,
         multiple: question.answerKey.correctOptionIds.length > 1,
+        answer: savedAnswer.data,
       });
     } else {
       questions.push({
@@ -218,6 +226,7 @@ function toExamQuestions(
         position: row.position,
         answerType: "SHORT_ANSWER",
         text: question.content.text,
+        answer: savedAnswer.data,
       });
     }
   }
@@ -268,5 +277,120 @@ export async function getExam(req: Request, res: Response): Promise<void> {
     console.error("Failed to load exam attempt.", error);
 
     res.status(500).json({ error: "Unable to load exam attempt." });
+  }
+}
+
+export async function saveAnswer(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  const body = saveAnswerRequestSchema.safeParse(req.body);
+
+  if (!body.success) {
+    res.status(400).json({
+      error: "Validation failed.",
+      fieldErrors: body.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      })),
+    });
+    return;
+  }
+
+  const attemptId = attemptIdSchema.safeParse(req.params.attemptId);
+
+  if (!attemptId.success) {
+    res.status(404).json({ error: "Attempt not found." });
+    return;
+  }
+
+  const questionId = attemptIdSchema.safeParse(req.params.questionId);
+
+  if (!questionId.success) {
+    res.status(404).json({ error: "Question not found." });
+    return;
+  }
+
+  const { optionIds, text } = body.data;
+
+  const question = await prisma.attemptQuestion.findFirst({
+    where: {
+      id: questionId.data,
+      attemptId: attemptId.data,
+      attempt: {
+        userId: user.id,
+      },
+    },
+    select: {
+      answerType: true,
+      answerKey: true,
+      content: true,
+      attempt: { select: { finishedAt: true, category: true } },
+    },
+  });
+
+  if (!question) {
+    res.status(404).json({ error: "Question not found." });
+    return;
+  }
+
+  if (question.attempt.finishedAt) {
+    res.status(409).json({
+      error: "Question belongs to finished exam attempt.",
+    });
+    return;
+  }
+
+  if (question.answerType === "MULTIPLE_CHOICE" && text !== undefined) {
+    res.status(400).json({ error: "This question expects optionIds." });
+    return;
+  }
+
+  if (question.answerType === "SHORT_ANSWER" && optionIds !== undefined) {
+    res.status(400).json({ error: "This question expects text." });
+    return;
+  }
+
+  const parsedQuestion = parseStoredQuestion({
+    answerType: question.answerType,
+    content: question.content,
+    answerKey: question.answerKey,
+    category: question.attempt.category,
+  });
+
+  if (!parsedQuestion) {
+    res.status(500).json({ error: "Stored question is invalid." });
+    return;
+  }
+
+  if (parsedQuestion.answerType === "MULTIPLE_CHOICE") {
+    const validIds = new Set(parsedQuestion.content.options.map((o) => o.id));
+
+    if (optionIds?.some((id) => !validIds.has(id))) {
+      res.status(400).json({ error: "Unknown option id." });
+      return;
+    }
+  }
+
+  try {
+    await prisma.attemptQuestion.update({
+      where: { id: questionId.data },
+      data: { answer: body.data },
+    });
+    res.status(204).end();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to save the answer." });
   }
 }
