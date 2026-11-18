@@ -125,12 +125,17 @@ export default function ExamPage() {
           position={question.position}
           total={attempt.questions.length}
           headingRef={headingRef}
+          hasReviewStep
           message={message}
           onNext={async () => {
             setMessage("");
             const saved = await saveCurrent(question);
             if (!saved) {
               setMessage("Could not save your answer");
+              return;
+            }
+            if (Number(position) === attempt.questions.length) {
+              navigate(`/exams/${attemptId}/review`);
               return;
             }
             navigate(`/exams/${attemptId}/questions/${Number(position) + 1}`);

@@ -13,6 +13,7 @@ import ExamCategoriesPage from "./pages/ExamCategoriesPage.tsx";
 import ExamIntroPage from "./pages/ExamIntroPage.tsx";
 import ExamPage from "./pages/ExamPage.tsx";
 import ExamRedirect from "./components/ExamRedirect.tsx";
+import ExamReviewPage from "./pages/ExamReviewPage.tsx";
 
 export default function App() {
   return (
@@ -45,6 +46,10 @@ export default function App() {
               <Route
                 path="/exams/:attemptId/questions/:position"
                 element={<ExamPage />}
+              />
+              <Route
+                path="/exams/:attemptId/review"
+                element={<ExamReviewPage />}
               />
               <Route path="/exams/:attemptId" element={<ExamRedirect />} />
             </Route>
