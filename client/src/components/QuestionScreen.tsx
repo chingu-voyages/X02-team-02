@@ -10,6 +10,7 @@ type QuestionScreenProps = {
   total: number;
   message?: string;
   headingRef: React.RefObject<HTMLHeadingElement | null>;
+  hasReviewStep: boolean;
   onChooseOption: (optionId: string) => void;
   onText: (text: string) => void;
   onPrevious: () => void;
@@ -23,12 +24,14 @@ export default function QuestionScreen({
   total,
   message,
   headingRef,
+  hasReviewStep,
   onChooseOption,
   onText,
   onPrevious,
   onNext,
 }: QuestionScreenProps) {
   const isLast = position === total;
+  const finishBtnText = hasReviewStep ? "Review answers" : "Finish";
 
   return (
     <section>
@@ -106,7 +109,7 @@ export default function QuestionScreen({
           Previous
         </button>
         <button type="button" className="btn-primary" onClick={onNext}>
-          {isLast ? "Finish" : "Next"}
+          {isLast ? finishBtnText : "Next"}
         </button>
       </div>
     </section>

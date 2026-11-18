@@ -167,6 +167,7 @@ export default function PracticeExamPage() {
           total={questions.length}
           message={message}
           headingRef={headingRef}
+          hasReviewStep={false}
           onChooseOption={(optionId) => {
             const question = questions[index];
             if (question.answerType === "MULTIPLE_CHOICE")
