@@ -8,6 +8,10 @@ import {
   forgotPassword,
   resetPassword,
 } from "./password-reset-handlers.js";
+import {
+  forgotPasswordRateLimit,
+  resetPasswordRateLimit,
+} from "./password-reset-rate-limit.js";
 
 const authRoutes = Router();
 
@@ -18,11 +22,13 @@ authRoutes.get("/me", me);
 
 authRoutes.post(
   "/forgot-password",
+  forgotPasswordRateLimit,
   forgotPassword,
 );
 
 authRoutes.post(
   "/reset-password",
+  resetPasswordRateLimit,
   resetPassword,
 );
 
