@@ -7,6 +7,8 @@ import AdminQuestionsPage from "./pages/AdminQuestionsPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import NewQuestionPage from "./pages/NewQuestionPage.tsx";
 import PracticeExamPage from "./pages/PracticeExamPage.tsx";
 import ExamCategoriesPage from "./pages/ExamCategoriesPage.tsx";
@@ -22,6 +24,8 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Public demo quiz: no login needed. */}
           <Route path="/practice-exam" element={<PracticeExamPage />} />
