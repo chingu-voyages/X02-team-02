@@ -80,4 +80,6 @@ export type {
   GetExamResponse,
   SaveAnswerRequest,
   SubmitExamResponse,
+  ExamResultQuestion,
+  GetExamResultResponse,
 } from "./schemas/exam.js";

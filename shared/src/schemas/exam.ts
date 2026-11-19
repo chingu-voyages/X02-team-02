@@ -67,3 +67,20 @@ export type SubmitExamResponse = {
   score: number;
   total: number;
 };
+
+export type ExamResultQuestion = {
+  id: string;
+  text: string;
+  yourAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+  position: number;
+};
+
+export type GetExamResultResponse = {
+  attemptId: string;
+  category: string;
+  score: number;
+  total: number;
+  results: ExamResultQuestion[];
+};
