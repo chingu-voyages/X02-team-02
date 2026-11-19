@@ -3,6 +3,7 @@ import type {
   StartExamResponse,
   GetExamResponse,
   SaveAnswerRequest,
+  SubmitExamResponse,
 } from "@x02/shared";
 import { apiFetch } from "./client.ts";
 
@@ -29,5 +30,11 @@ export function saveAnswer(
   return apiFetch<void>(`/exams/${attemptId}/questions/${questionId}/answer`, {
     method: "PUT",
     body: answer,
+  });
+}
+
+export function submitExam(attemptId: string) {
+  return apiFetch<SubmitExamResponse>(`/exams/${attemptId}/submit`, {
+    method: "POST",
   });
 }
