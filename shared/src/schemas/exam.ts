@@ -61,3 +61,9 @@ export const saveAnswerRequestSchema = z
   .strict();
 
 export type SaveAnswerRequest = z.infer<typeof saveAnswerRequestSchema>;
+
+export type SubmitExamResponse = {
+  attemptId: string;
+  score: number;
+  total: number;
+};
