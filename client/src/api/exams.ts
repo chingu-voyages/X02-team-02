@@ -4,6 +4,7 @@ import type {
   GetExamResponse,
   SaveAnswerRequest,
   SubmitExamResponse,
+  GetExamResultResponse,
 } from "@x02/shared";
 import { apiFetch } from "./client.ts";
 
@@ -37,4 +38,8 @@ export function submitExam(attemptId: string) {
   return apiFetch<SubmitExamResponse>(`/exams/${attemptId}/submit`, {
     method: "POST",
   });
+}
+
+export function getExamResult(attemptId: string) {
+  return apiFetch<GetExamResultResponse>(`/exams/${attemptId}/result`);
 }

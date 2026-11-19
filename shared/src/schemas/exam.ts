@@ -82,5 +82,6 @@ export type GetExamResultResponse = {
   category: string;
   score: number;
   total: number;
+  finishedAt: string;
   results: ExamResultQuestion[];
 };

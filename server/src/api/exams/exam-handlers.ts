@@ -576,6 +576,7 @@ export async function getExamResult(
       category: attempt.category,
       score: attempt.score ?? 0,
       total: attempt.questions.length,
+      finishedAt: attempt.finishedAt.toISOString(),
       results,
     };
     res.status(200).json(response);
