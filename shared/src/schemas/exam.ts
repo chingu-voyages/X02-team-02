@@ -48,6 +48,7 @@ export type GetCategoriesResponse = {
 export type GetExamResponse = {
   attemptId: string;
   category: string;
+  finished: boolean;
   questions: ExamQuestion[];
 };
 

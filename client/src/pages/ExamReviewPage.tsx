@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router";
 import type { GetExamResponse, ExamQuestion } from "@x02/shared";
 import { getExam, submitExam } from "../api/exams";
@@ -20,6 +20,7 @@ export default function ExamReviewPage() {
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     if (!attemptId) return;
@@ -30,6 +31,12 @@ export default function ExamReviewPage() {
 
       try {
         const response = await getExam(id);
+
+        if (response.finished) {
+          navigate(`/exams/${id}/result`, { replace: true });
+          return;
+        }
+
         setAttempt(response);
         setStatus("ready");
       } catch (error) {
@@ -43,7 +50,11 @@ export default function ExamReviewPage() {
     }
 
     loadAttempt(attemptId);
-  }, [attemptId]);
+  }, [attemptId, navigate]);
+
+  useEffect(() => {
+    headingRef.current?.focus();
+  }, [status]);
 
   const answeredCount =
     attempt?.questions.filter((q) => isAnswered(q)).length ?? 0;
@@ -73,7 +84,13 @@ export default function ExamReviewPage() {
 
   return (
     <section className="mx-auto max-w-2xl">
-      <h2 className="text-xl font-semibold text-center">Review your answers</h2>
+      <h2
+        className="text-xl font-semibold text-center outline-none"
+        ref={headingRef}
+        tabIndex={-1}
+      >
+        Review your answers
+      </h2>
       {status === "loading" && <p role="status">Loading review...</p>}
       {status === "error" && <p role="alert">{message}</p>}
       {status === "ready" && attempt && (

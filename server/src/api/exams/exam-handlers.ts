@@ -14,6 +14,7 @@ import type {
   Prisma,
 } from "../../../generated/prisma/client.js";
 import { gradeAnswer } from "../practice/grading.js";
+import { finished } from "node:stream";
 
 const GRADABLE_TYPES = ["MULTIPLE_CHOICE", "SHORT_ANSWER"] as const;
 type NewAttemptQuestion =
@@ -274,6 +275,7 @@ export async function getExam(req: Request, res: Response): Promise<void> {
       attemptId: attempt.id,
       questions: toExamQuestions(attempt.questions, attempt.category),
       category: attempt.category,
+      finished: attempt.finishedAt !== null,
     });
   } catch (error) {
     console.error("Failed to load exam attempt.", error);
