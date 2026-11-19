@@ -4,14 +4,15 @@ import {
   startExamRequestSchema,
   attemptIdSchema,
   saveAnswerRequestSchema,
+  PracticeResult,
 } from "@x02/shared";
-import type { ExamQuestion } from "@x02/shared";
+import type { ExamQuestion, SubmitExamResponse } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
 import type {
   AttemptQuestion,
   Prisma,
 } from "../../../generated/prisma/client.js";
-import { error } from "node:console";
+import { gradeAnswer, type GradedAnswer } from "../practice/grading.js";
 
 const GRADABLE_TYPES = ["MULTIPLE_CHOICE", "SHORT_ANSWER"] as const;
 type NewAttemptQuestion =
@@ -280,6 +281,7 @@ export async function getExam(req: Request, res: Response): Promise<void> {
   }
 }
 
+// Save an answer to one attempt question
 export async function saveAnswer(req: Request, res: Response): Promise<void> {
   if (!req.user) {
     res.status(401).json({ error: "Authentication required." });
@@ -392,5 +394,105 @@ export async function saveAnswer(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to save the answer." });
+  }
+}
+
+// Grade each answer and submit exam
+export async function submitExam(req: Request, res: Response): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  const attemptId = attemptIdSchema.safeParse(req.params.attemptId);
+
+  if (!attemptId.success) {
+    res.status(404).json({ error: "Attempt not found." });
+    return;
+  }
+
+  try {
+    const attempt = await prisma.attempt.findFirst({
+      where: { id: attemptId.data, userId: user.id },
+      include: { questions: { orderBy: { position: "asc" } } },
+    });
+
+    if (!attempt) {
+      res.status(404).json({ error: "Attempt not found." });
+      return;
+    }
+
+    // if attempt already finished send back exam response
+    if (attempt.finishedAt) {
+      const response: SubmitExamResponse = {
+        attemptId: attempt.id,
+        score: attempt.score ?? 0,
+        total: attempt.questions.length,
+      };
+      res.status(200).json(response);
+      return;
+    }
+
+    // store isCorrect for each attempt question and count total score
+    const results: { id: string; isCorrect: boolean }[] = [];
+    let score = 0;
+
+    for (const question of attempt.questions) {
+      const parsedQuestion = parseStoredQuestion({
+        answerType: question.answerType,
+        content: question.content,
+        answerKey: question.answerKey,
+        category: attempt.category,
+      });
+
+      if (!parsedQuestion) {
+        res.status(500).json({ error: "Stored question is invalid." });
+        return;
+      }
+
+      const savedAnswer = saveAnswerRequestSchema.safeParse(question.answer);
+
+      const gradedAnswer = gradeAnswer(parsedQuestion, {
+        ...savedAnswer.data,
+        questionId: question.id,
+      });
+
+      results.push({ id: question.id, isCorrect: gradedAnswer.isCorrect });
+      if (gradedAnswer.isCorrect) score += 1;
+    }
+
+    // update exam attempt and all attempt questions at once
+    await prisma.$transaction([
+      prisma.attempt.update({
+        where: { id: attemptId.data },
+        data: { finishedAt: new Date(), score },
+      }),
+      ...results.map((r) =>
+        prisma.attemptQuestion.update({
+          where: { id: r.id },
+          data: { isCorrect: r.isCorrect },
+        }),
+      ),
+    ]);
+
+    // send exam response
+    const response: SubmitExamResponse = {
+      attemptId: attempt.id,
+      score,
+      total: attempt.questions.length,
+    };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to submit the exam." });
   }
 }

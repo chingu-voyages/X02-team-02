@@ -79,4 +79,5 @@ export type {
   ExamQuestion,
   GetExamResponse,
   SaveAnswerRequest,
+  SubmitExamResponse,
 } from "./schemas/exam.js";
