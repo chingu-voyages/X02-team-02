@@ -30,6 +30,11 @@ export default function ExamPage() {
       try {
         const response = await getExam(id);
 
+        if (response.finished) {
+          navigate(`/exams/${id}/result`, { replace: true });
+          return;
+        }
+
         const loadedAnswers: Record<string, Entry> = {};
 
         response.questions.forEach((q) => {
@@ -55,7 +60,7 @@ export default function ExamPage() {
     }
 
     loadAttempt(attemptId);
-  }, [attemptId]);
+  }, [attemptId, navigate]);
 
   // Move focus to the heading whenever the screen changes, so keyboard and
   // screen-reader users land at the top of the new content.

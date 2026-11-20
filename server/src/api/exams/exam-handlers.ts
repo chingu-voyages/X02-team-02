@@ -4,7 +4,8 @@ import {
   startExamRequestSchema,
   attemptIdSchema,
   saveAnswerRequestSchema,
-  PracticeResult,
+  ExamResultQuestion,
+  GetExamResultResponse,
 } from "@x02/shared";
 import type { ExamQuestion, SubmitExamResponse } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
@@ -12,7 +13,8 @@ import type {
   AttemptQuestion,
   Prisma,
 } from "../../../generated/prisma/client.js";
-import { gradeAnswer, type GradedAnswer } from "../practice/grading.js";
+import { gradeAnswer } from "../practice/grading.js";
+import { finished } from "node:stream";
 
 const GRADABLE_TYPES = ["MULTIPLE_CHOICE", "SHORT_ANSWER"] as const;
 type NewAttemptQuestion =
@@ -273,6 +275,7 @@ export async function getExam(req: Request, res: Response): Promise<void> {
       attemptId: attempt.id,
       questions: toExamQuestions(attempt.questions, attempt.category),
       category: attempt.category,
+      finished: attempt.finishedAt !== null,
     });
   } catch (error) {
     console.error("Failed to load exam attempt.", error);
@@ -494,5 +497,93 @@ export async function submitExam(req: Request, res: Response): Promise<void> {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to submit the exam." });
+  }
+}
+
+export async function getExamResult(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  const attemptId = attemptIdSchema.safeParse(req.params.attemptId);
+
+  if (!attemptId.success) {
+    res.status(404).json({ error: "Attempt not found." });
+    return;
+  }
+
+  try {
+    const attempt = await prisma.attempt.findFirst({
+      where: { id: attemptId.data, userId: user.id },
+      include: { questions: { orderBy: { position: "asc" } } },
+    });
+
+    if (!attempt) {
+      res.status(404).json({ error: "Attempt not found." });
+      return;
+    }
+
+    if (!attempt.finishedAt) {
+      res.status(409).json({ error: "Exam not submitted yet." });
+      return;
+    }
+
+    const results: ExamResultQuestion[] = [];
+
+    for (const question of attempt.questions) {
+      const parsedQuestion = parseStoredQuestion({
+        answerType: question.answerType,
+        content: question.content,
+        answerKey: question.answerKey,
+        category: attempt.category,
+      });
+
+      if (!parsedQuestion) {
+        res.status(500).json({ error: "Stored question is invalid." });
+        return;
+      }
+
+      const savedAnswer = saveAnswerRequestSchema.safeParse(question.answer);
+
+      const gradedAnswer = gradeAnswer(parsedQuestion, {
+        ...savedAnswer.data,
+        questionId: question.id,
+      });
+
+      results.push({
+        id: question.id,
+        text: parsedQuestion.content.text,
+        yourAnswer: gradedAnswer.yourAnswer,
+        correctAnswer: gradedAnswer.correctAnswer,
+        isCorrect: question.isCorrect ?? false,
+        position: question.position,
+      });
+    }
+
+    const response: GetExamResultResponse = {
+      attemptId: attempt.id,
+      category: attempt.category,
+      score: attempt.score ?? 0,
+      total: attempt.questions.length,
+      finishedAt: attempt.finishedAt.toISOString(),
+      results,
+    };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to load the exam result." });
   }
 }

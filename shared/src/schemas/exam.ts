@@ -48,6 +48,7 @@ export type GetCategoriesResponse = {
 export type GetExamResponse = {
   attemptId: string;
   category: string;
+  finished: boolean;
   questions: ExamQuestion[];
 };
 
@@ -66,4 +67,22 @@ export type SubmitExamResponse = {
   attemptId: string;
   score: number;
   total: number;
+};
+
+export type ExamResultQuestion = {
+  id: string;
+  text: string;
+  yourAnswer: string;
+  correctAnswer: string;
+  isCorrect: boolean;
+  position: number;
+};
+
+export type GetExamResultResponse = {
+  attemptId: string;
+  category: string;
+  score: number;
+  total: number;
+  finishedAt: string;
+  results: ExamResultQuestion[];
 };

@@ -6,6 +6,7 @@ import {
   getExam,
   saveAnswer,
   submitExam,
+  getExamResult,
 } from "./exam-handlers.js";
 
 const examRoutes = Router();
@@ -19,5 +20,6 @@ examRoutes.put(
   saveAnswer,
 );
 examRoutes.post("/:attemptId/submit", requireAuth, submitExam);
+examRoutes.get("/:attemptId/result", requireAuth, getExamResult);
 
 export default examRoutes;
