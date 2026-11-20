@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import { getExamResult } from "../api/exams";
 import type { GetExamResultResponse } from "@x02/shared";
 import { ApiError } from "../api/client";
@@ -73,6 +73,17 @@ export default function ExamResultPage() {
               />
             ))}
           </ol>
+          <div className="mt-8 flex align-center gap-3">
+            <Link
+              to={`/exams/${encodeURIComponent(result.category)}/start`}
+              className="btn-primary text-center"
+            >
+              Retake the exam
+            </Link>
+            <Link to="/exams" className="btn-neutral">
+              Back to exams
+            </Link>
+          </div>
         </>
       )}
     </section>
