@@ -4,14 +4,21 @@ import { useAuth } from "../auth/useAuth.ts";
 
 const adminLinks = [
   { label: "Dashboard", to: "#", end: true },
+  { label: "Exams", to: "/exams", end: true },
   { label: "Questions", to: "/admin/questions", end: false },
   { label: "Users", to: "#", end: false },
   { label: "Reports", to: "#", end: false },
 ];
 
+const learnerLinks = [
+  { label: "Exams", to: "/exams", end: true },
+  { label: "Journal", to: "#", end: false },
+  { label: "Questions", to: "#", end: false },
+];
+
 export default function Layout() {
   const [logoutError, setLogoutError] = useState<string | null>(null);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
 
   const onLogout = async () => {
@@ -25,6 +32,8 @@ export default function Layout() {
     }
   };
 
+  const links = user?.role === "ADMIN" ? adminLinks : learnerLinks;
+
   return (
     <div className="flex flex-col h-dvh">
       <header className="lg:mb-4 border-b border-line">
@@ -34,7 +43,7 @@ export default function Layout() {
           </Link>
 
           <nav className="flex justify-between gap-3">
-            {adminLinks.map((link) => (
+            {links.map((link) => (
               <NavLink key={link.label} to={link.to} end={link.end}>
                 {link.label}
               </NavLink>

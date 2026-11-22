@@ -101,6 +101,24 @@ describe("Session helpers", () => {
         where: { id: "expired" },
       });
     });
+
+    it("returns null and deletes all sessions when the account is blocked", async () => {
+      mockFindUnique.mockResolvedValue({
+        expiresAt: new Date(NOW.getTime() + 1000),
+        user: {
+          ...user,
+          status: "BLOCKED",
+        },
+      });
+    
+      mockDeleteMany.mockResolvedValue({ count: 2 });
+    
+      expect(await getSessionUser("blocked-session")).toBeNull();
+    
+      expect(mockDeleteMany).toHaveBeenCalledWith({
+        where: { userId: user.id },
+      });
+    });
   });
 
   describe("deleteSession", () => {

@@ -8,12 +8,26 @@ const {
   mockSessionCreate,
   mockHashPassword,
   mockVerifyPassword,
+  mockResetTokenCreate,
+  mockResetTokenFindUnique,
+  mockResetTokenDeleteMany,
+  mockUserUpdateMany,
+  mockSessionDeleteMany,
+  mockTransaction,
+  mockSendPasswordResetEmail,
 } = vi.hoisted(() => ({
   mockCreate: vi.fn(),
   mockFindUnique: vi.fn(),
   mockSessionCreate: vi.fn(),
   mockHashPassword: vi.fn(),
   mockVerifyPassword: vi.fn(),
+  mockResetTokenCreate: vi.fn(),
+  mockResetTokenFindUnique: vi.fn(),
+  mockResetTokenDeleteMany: vi.fn(),
+  mockUserUpdateMany: vi.fn(),
+  mockSessionDeleteMany: vi.fn(),
+  mockTransaction: vi.fn(),
+  mockSendPasswordResetEmail: vi.fn(),
 }));
 
 vi.mock("../../db/prisma.js", () => ({
@@ -25,12 +39,22 @@ vi.mock("../../db/prisma.js", () => ({
     session: {
       create: mockSessionCreate,
     },
+    passwordResetToken: {
+      create: mockResetTokenCreate,
+      findUnique: mockResetTokenFindUnique,
+      deleteMany: mockResetTokenDeleteMany,
+    },
+    $transaction: mockTransaction,
   },
 }));
 
 vi.mock("./password.js", () => ({
   hashPassword: mockHashPassword,
   verifyPassword: mockVerifyPassword,
+}));
+
+vi.mock("../../services/email-service.js", () => ({
+  sendPasswordResetEmail: mockSendPasswordResetEmail,
 }));
 
 describe("Auth routes", () => {
@@ -41,6 +65,28 @@ describe("Auth routes", () => {
     mockVerifyPassword.mockResolvedValue(true);
 
     mockSessionCreate.mockResolvedValue({});
+    mockResetTokenCreate.mockResolvedValue({});
+    mockResetTokenDeleteMany.mockResolvedValue({ count: 1 });
+    mockResetTokenFindUnique.mockResolvedValue(null);
+    mockUserUpdateMany.mockResolvedValue({ count: 1 });
+    mockSessionDeleteMany.mockResolvedValue({ count: 1 });
+    mockSendPasswordResetEmail.mockResolvedValue(undefined);
+
+    mockTransaction.mockImplementation(
+      async (callback: (tx: unknown) => Promise<unknown>) =>
+        callback({
+          passwordResetToken: {
+            create: mockResetTokenCreate,
+            deleteMany: mockResetTokenDeleteMany,
+          },
+          user: {
+            updateMany: mockUserUpdateMany,
+          },
+          session: {
+            deleteMany: mockSessionDeleteMany,
+          },
+        }),
+    );
   });
 
   describe("POST /api/auth/register", () => {
@@ -83,18 +129,18 @@ describe("Auth routes", () => {
         ...validUser,
         password: "12345678",
       };
-    
+
       mockCreate.mockResolvedValue({
         id: "00000000-0000-0000-0000-000000000001",
         username: user.username,
         email: user.email,
         role: "LEARNER",
       });
-    
+
       const response = await request(app)
         .post("/api/auth/register")
         .send(user);
-    
+
       expect(response.status).toBe(201);
       expect(mockHashPassword).toHaveBeenCalledWith(user.password);
       expect(mockCreate).toHaveBeenCalledTimes(1);
@@ -122,7 +168,7 @@ describe("Auth routes", () => {
           email: "",
           password: "",
         });
-    
+
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         error: "Validation failed.",
@@ -141,7 +187,7 @@ describe("Auth routes", () => {
           },
         ],
       });
-    
+
       expect(mockCreate).not.toHaveBeenCalled();
       expect(mockHashPassword).not.toHaveBeenCalled();
     });
@@ -154,7 +200,7 @@ describe("Auth routes", () => {
           email: "invalid-email",
           password: "short",
         });
-    
+
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         error: "Validation failed.",
@@ -173,7 +219,7 @@ describe("Auth routes", () => {
           },
         ],
       });
-    
+
       expect(mockHashPassword).not.toHaveBeenCalled();
       expect(mockCreate).not.toHaveBeenCalled();
     });
@@ -185,7 +231,7 @@ describe("Auth routes", () => {
           ...validUser,
           password: "Short7!",
         });
-    
+
       expect(response.status).toBe(400);
       expect(response.body).toEqual({
         error: "Validation failed.",
@@ -196,7 +242,7 @@ describe("Auth routes", () => {
           },
         ],
       });
-    
+
       expect(mockHashPassword).not.toHaveBeenCalled();
       expect(mockCreate).not.toHaveBeenCalled();
     });
@@ -239,16 +285,16 @@ describe("Auth routes", () => {
       const consoleError = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-    
+
       mockCreate.mockRejectedValueOnce(
         new Error("Database connection failed"),
       );
-    
+
       try {
         const response = await request(app)
           .post("/api/auth/register")
           .send(validUser);
-    
+
         expect(response.status).toBe(500);
         expect(response.body).toEqual({
           error: "Unable to register account.",
@@ -271,6 +317,7 @@ describe("Auth routes", () => {
       email: "testuser@example.com",
       role: "LEARNER",
       passwordHash: "stored-password-hash",
+      status: "ACTIVE",
     };
 
     it("returns 200, creates a session, and sets the session cookie", async () => {
@@ -300,6 +347,7 @@ describe("Auth routes", () => {
           email: true,
           role: true,
           passwordHash: true,
+          status: true,
         },
       });
 
@@ -383,6 +431,225 @@ describe("Auth routes", () => {
       expect(mockFindUnique).not.toHaveBeenCalled();
       expect(mockVerifyPassword).not.toHaveBeenCalled();
       expect(mockSessionCreate).not.toHaveBeenCalled();
+    });
+
+    it("returns the generic 401 response and does not create a session for blocked users", async () => {
+      mockFindUnique.mockResolvedValue({
+        ...storedUser,
+        status: "BLOCKED",
+      });
+
+      const response = await request(app)
+        .post("/api/auth/login")
+        .send(credentials);
+
+      expect(response.status).toBe(401);
+      expect(response.body).toEqual({
+        error: "Invalid email or password",
+      });
+
+      expect(mockVerifyPassword).not.toHaveBeenCalled();
+      expect(mockSessionCreate).not.toHaveBeenCalled();
+      expect(response.headers["set-cookie"]).toBeUndefined();
+    });
+  });
+
+  describe("POST /api/auth/forgot-password", () => {
+    const email = "testuser@example.com";
+    const activeUser = {
+      id: "00000000-0000-0000-0000-000000000001",
+      email,
+      status: "ACTIVE",
+    };
+
+    const genericResponse = {
+      message:
+        "If an account exists for that email, a password reset link will be sent.",
+    };
+
+    it("creates a reset token and sends an email for an active account", async () => {
+      mockFindUnique.mockResolvedValue(activeUser);
+
+      const response = await request(app)
+        .post("/api/auth/forgot-password")
+        .send({ email });
+
+      expect(response.status).toBe(202);
+      expect(response.body).toEqual(genericResponse);
+
+      expect(mockFindUnique).toHaveBeenCalledWith({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          status: true,
+        },
+      });
+
+      expect(mockTransaction).toHaveBeenCalledTimes(1);
+      expect(mockResetTokenDeleteMany).toHaveBeenCalledWith({
+        where: { userId: activeUser.id },
+      });
+
+      expect(mockResetTokenCreate).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: activeUser.id,
+          tokenHash: expect.any(String),
+          expiresAt: expect.any(Date),
+        }),
+      });
+
+      expect(mockSendPasswordResetEmail).toHaveBeenCalledWith(
+        email,
+        expect.stringMatching(/^http:\/\/localhost:5173\/reset-password\?token=/),
+      );
+    });
+
+    it("returns the same response when the email does not belong to an account", async () => {
+      mockFindUnique.mockResolvedValue(null);
+
+      const response = await request(app)
+        .post("/api/auth/forgot-password")
+        .send({ email });
+
+      expect(response.status).toBe(202);
+      expect(response.body).toEqual(genericResponse);
+
+      expect(mockTransaction).not.toHaveBeenCalled();
+      expect(mockSendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when the email address is invalid", async () => {
+      const response = await request(app)
+        .post("/api/auth/forgot-password")
+        .send({ email: "invalid-email" });
+
+      expect(response.status).toBe(400);
+      expect(mockFindUnique).not.toHaveBeenCalled();
+      expect(mockSendPasswordResetEmail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("POST /api/auth/reset-password", () => {
+    const token = "valid-reset-token";
+    const password = "NewPassword123!";
+    const userId = "00000000-0000-0000-0000-000000000001";
+
+    const validResetToken = {
+      id: "00000000-0000-0000-0000-000000000002",
+      userId,
+      expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+      user: {
+        status: "ACTIVE",
+      },
+    };
+
+    it("resets the password and invalidates existing sessions", async () => {
+      mockResetTokenFindUnique.mockResolvedValue(validResetToken);
+
+      const response = await request(app)
+        .post("/api/auth/reset-password")
+        .send({ token, password });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        message: "Your password has been reset. Please log in.",
+      });
+
+      expect(mockResetTokenFindUnique).toHaveBeenCalledWith({
+        where: {
+          tokenHash: expect.any(String),
+        },
+        select: {
+          id: true,
+          userId: true,
+          expiresAt: true,
+          user: {
+            select: {
+              status: true,
+            },
+          },
+        },
+      });
+
+      expect(mockHashPassword).toHaveBeenCalledWith(password);
+
+      expect(mockResetTokenDeleteMany).toHaveBeenCalledWith({
+        where: {
+          id: validResetToken.id,
+          tokenHash: expect.any(String),
+          expiresAt: {
+            gt: expect.any(Date),
+          },
+        },
+      });
+
+      expect(mockUserUpdateMany).toHaveBeenCalledWith({
+        where: {
+          id: userId,
+          status: "ACTIVE",
+        },
+        data: {
+          passwordHash: "hashed-password",
+        },
+      });
+
+      expect(mockSessionDeleteMany).toHaveBeenCalledWith({
+        where: { userId },
+      });
+
+      expect(mockResetTokenDeleteMany).toHaveBeenCalledWith({
+        where: { userId },
+      });
+    });
+
+    it("returns 400 when the reset token is invalid", async () => {
+      mockResetTokenFindUnique.mockResolvedValue(null);
+
+      const response = await request(app)
+        .post("/api/auth/reset-password")
+        .send({ token, password });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "This password reset link is invalid or has expired.",
+      });
+
+      expect(mockHashPassword).not.toHaveBeenCalled();
+      expect(mockTransaction).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when the reset token has expired", async () => {
+      mockResetTokenFindUnique.mockResolvedValue({
+        ...validResetToken,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      const response = await request(app)
+        .post("/api/auth/reset-password")
+        .send({ token, password });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "This password reset link is invalid or has expired.",
+      });
+
+      expect(mockHashPassword).not.toHaveBeenCalled();
+      expect(mockTransaction).not.toHaveBeenCalled();
+    });
+
+    it("returns 400 when the new password is shorter than 8 characters", async () => {
+      const response = await request(app)
+        .post("/api/auth/reset-password")
+        .send({ token, password: "short" });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        error: "Password must be at least 8 characters.",
+      });
+
+      expect(mockResetTokenFindUnique).not.toHaveBeenCalled();
+      expect(mockHashPassword).not.toHaveBeenCalled();
     });
   });
 });

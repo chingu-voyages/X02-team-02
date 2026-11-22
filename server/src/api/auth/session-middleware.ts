@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import type { UserRole } from "@x02/shared";
 import { SESSION_COOKIE_NAME } from "./session-cookie.js";
 import { getSessionUser } from "./session.js";
 
@@ -15,9 +16,9 @@ declare global {
   }
 }
 
-// Works out who is logged in and attaches them to the request. It only
-// identifies: it always calls next(), so public routes keep working. Needs
-// cookie-parser to run first. Express 5 forwards errors thrown here.
+// Works out who is logged in and attaches them to the request.
+// It only identifies: it always calls next(), so public routes keep working.
+// Needs cookie-parser to run first. Express 5 forwards errors thrown here.
 export async function attachUser(
   req: Request,
   _res: Response,
@@ -37,11 +38,45 @@ export async function attachUser(
 }
 
 // Blocks the request unless attachUser found a logged-in user.
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
+export function requireAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   if (!req.user) {
-    res.status(401).json({ error: "Authentication required." });
+    res.status(401).json({
+      error: "Authentication required.",
+    });
     return;
   }
 
   next();
+}
+
+// Allows only authenticated users whose server-resolved role is
+// explicitly included in the allowed roles.
+//
+// An empty allowedRoles list denies every authenticated user.
+export function requireRole(...allowedRoles: UserRole[]) {
+  return function checkRole(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    if (!req.user) {
+      res.status(401).json({
+        error: "Authentication required.",
+      });
+      return;
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      res.status(403).json({
+        error: "Forbidden.",
+      });
+      return;
+    }
+
+    next();
+  };
 }

@@ -1,13 +1,13 @@
+import { Link, useNavigate } from "react-router";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginFormSchema, type LoginInput } from "../schemas/authSchema.ts";
 import type { LoginRequest } from "@x02/shared";
 import { ApiError } from "../api/client.ts";
 import { useAuth } from "../auth/useAuth.ts";
-import { useNavigate } from "react-router";
 
 export default function LoginForm() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const {
     register,
     handleSubmit,
@@ -28,7 +28,9 @@ export default function LoginForm() {
     try {
       await login(request);
       // TODO: navigate to different route later
-      navigate("/admin/questions");
+      if (user?.role === "LEARNER") {
+        navigate("/");
+      } else navigate("/admin/questions");
     } catch (error) {
       console.log(error);
       if (error instanceof ApiError) {
@@ -95,6 +97,15 @@ export default function LoginForm() {
             {errors.password.message}
           </p>
         )}
+      </div>
+
+      <div className="text-right">
+        <Link
+          to="/forgot-password"
+          className="text-sm text-accent-fg hover:underline focus-ring"
+        >
+          Forgot password?
+        </Link>
       </div>
 
       {errors.root?.server && (
