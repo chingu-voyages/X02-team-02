@@ -82,4 +82,6 @@ export type {
   SubmitExamResponse,
   ExamResultQuestion,
   GetExamResultResponse,
+  ExamHistoryItem,
+  GetExamsHistoryResponse,
 } from "./schemas/exam.js";

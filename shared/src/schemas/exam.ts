@@ -86,3 +86,15 @@ export type GetExamResultResponse = {
   finishedAt: string;
   results: ExamResultQuestion[];
 };
+
+export type ExamHistoryItem = {
+  attemptId: string;
+  finishedAt: string;
+  score: number;
+  total: number;
+  category: string;
+};
+
+export type GetExamsHistoryResponse = {
+  attempts: ExamHistoryItem[];
+};

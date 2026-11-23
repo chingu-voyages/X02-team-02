@@ -7,11 +7,13 @@ import {
   saveAnswer,
   submitExam,
   getExamResult,
+  getExamsHistory,
 } from "./exam-handlers.js";
 
 const examRoutes = Router();
 
 examRoutes.get("/categories", requireAuth, getCategories);
+examRoutes.get("/history", requireAuth, getExamsHistory);
 examRoutes.get("/:attemptId", requireAuth, getExam);
 examRoutes.post("/", requireAuth, startExam);
 examRoutes.put(

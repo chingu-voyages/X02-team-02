@@ -6,6 +6,8 @@ import {
   saveAnswerRequestSchema,
   ExamResultQuestion,
   GetExamResultResponse,
+  ExamHistoryItem,
+  GetExamsHistoryResponse,
 } from "@x02/shared";
 import type { ExamQuestion, SubmitExamResponse } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
@@ -14,7 +16,6 @@ import type {
   Prisma,
 } from "../../../generated/prisma/client.js";
 import { gradeAnswer } from "../practice/grading.js";
-import { finished } from "node:stream";
 
 const GRADABLE_TYPES = ["MULTIPLE_CHOICE", "SHORT_ANSWER"] as const;
 type NewAttemptQuestion =
@@ -585,5 +586,53 @@ export async function getExamResult(
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Unable to load the exam result." });
+  }
+}
+
+// fetch finished exams to display on learner's journal page
+export async function getExamsHistory(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  try {
+    const attempts = await prisma.attempt.findMany({
+      where: { userId: user.id, finishedAt: { not: null } },
+      select: {
+        id: true,
+        finishedAt: true,
+        score: true,
+        category: true,
+        _count: { select: { questions: true } },
+      },
+      orderBy: { finishedAt: "desc" },
+    });
+
+    const attemptsRes: ExamHistoryItem[] = attempts.map((attempt) => ({
+      attemptId: attempt.id,
+      finishedAt: attempt.finishedAt?.toISOString() ?? "",
+      score: attempt.score ?? 0,
+      total: attempt._count.questions,
+      category: attempt.category,
+    }));
+
+    const response: GetExamsHistoryResponse = { attempts: attemptsRes };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to load past attempts." });
   }
 }
