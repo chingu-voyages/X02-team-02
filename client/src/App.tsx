@@ -17,6 +17,7 @@ import ExamPage from "./pages/ExamPage.tsx";
 import ExamRedirect from "./components/ExamRedirect.tsx";
 import ExamReviewPage from "./pages/ExamReviewPage.tsx";
 import ExamResultPage from "./pages/ExamResultPage.tsx";
+import JournalPage from "./pages/JournalPage.tsx";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
             {/* Learner routes */}
             <Route element={<Layout />}>
               <Route path="/exams" element={<ExamCategoriesPage />} />
+              <Route path="/journal" element={<JournalPage />} />
               <Route
                 path="/exams/:category/start"
                 element={<ExamIntroPage />}

@@ -12,7 +12,7 @@ const adminLinks = [
 
 const learnerLinks = [
   { label: "Exams", to: "/exams", end: true },
-  { label: "Journal", to: "#", end: false },
+  { label: "Journal", to: "/journal", end: false },
   { label: "Questions", to: "#", end: false },
 ];
 

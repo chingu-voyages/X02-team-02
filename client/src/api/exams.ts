@@ -5,6 +5,7 @@ import type {
   SaveAnswerRequest,
   SubmitExamResponse,
   GetExamResultResponse,
+  GetExamsHistoryResponse,
 } from "@x02/shared";
 import { apiFetch } from "./client.ts";
 
@@ -42,4 +43,8 @@ export function submitExam(attemptId: string) {
 
 export function getExamResult(attemptId: string) {
   return apiFetch<GetExamResultResponse>(`/exams/${attemptId}/result`);
+}
+
+export function getExamsHistory() {
+  return apiFetch<GetExamsHistoryResponse>("/exams/history");
 }
