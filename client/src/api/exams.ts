@@ -6,6 +6,7 @@ import type {
   SubmitExamResponse,
   GetExamResultResponse,
   GetExamsHistoryResponse,
+  GetInProgressExamResponse,
 } from "@x02/shared";
 import { apiFetch } from "./client.ts";
 
@@ -47,4 +48,10 @@ export function getExamResult(attemptId: string) {
 
 export function getExamsHistory() {
   return apiFetch<GetExamsHistoryResponse>("/exams/history");
+}
+
+export function getInProgressExam(category: string) {
+  return apiFetch<GetInProgressExamResponse>(
+    `/exams/in-progress?category=${encodeURIComponent(category)}`,
+  );
 }

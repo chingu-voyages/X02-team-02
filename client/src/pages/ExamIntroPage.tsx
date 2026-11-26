@@ -1,13 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router";
 import { ApiError } from "../api/client.ts";
-import { startExam } from "../api/exams.ts";
+import { getInProgressExam, startExam } from "../api/exams.ts";
 
 export default function ExamIntroPage() {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  const [inProgressAttemptId, setInProgressAttemptId] = useState<string | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!category) return;
+
+    async function loadInProgressExam(category: string) {
+      try {
+        const response = await getInProgressExam(category);
+        setInProgressAttemptId(response.attemptId);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadInProgressExam(category);
+  }, [category]);
 
   if (!category) {
     return <p role="alert">No category selected.</p>;
@@ -32,6 +52,8 @@ export default function ExamIntroPage() {
     }
   }
 
+  const startBtn = inProgressAttemptId ? "Resume exam" : "Begin exam";
+
   return (
     <section className="mx-auto max-w-md">
       <h2 className="text-xl font-semibold">{category} practice test</h2>
@@ -42,6 +64,12 @@ export default function ExamIntroPage() {
         <li>You can go back to questions you are unsure about</li>
         <li>At the end you get your score and the correct solutions</li>
       </ul>
+
+      {inProgressAttemptId && (
+        <p className="mt-4">
+          You have an exam in progress. Resume to continue where you left off.
+        </p>
+      )}
 
       {message && (
         <p role="alert" className="mt-4">
@@ -54,10 +82,11 @@ export default function ExamIntroPage() {
           type="button"
           className="btn-primary"
           onClick={() => onBegin()}
-          disabled={isStarting}
+          disabled={isStarting || isLoading}
         >
-          {isStarting ? "Starting..." : "Begin exam"}
+          {isStarting ? "Starting..." : isLoading ? "Loading..." : startBtn}
         </button>
+
         <Link to="/exams" className="btn-secondary">
           Back to exams
         </Link>
