@@ -3,9 +3,11 @@ import type { PracticeOption } from "../practice";
 
 export const MAX_EXAM_QUESTION_COUNT = 50;
 
+export const categorySchema = z.string().trim().min(1).max(100);
+
 export const startExamRequestSchema = z
   .object({
-    category: z.string().trim().min(1).max(100),
+    category: categorySchema,
     count: z.number().int().min(1).max(MAX_EXAM_QUESTION_COUNT).optional(),
   })
   .strict();
@@ -95,6 +97,12 @@ export type ExamHistoryItem = {
   category: string;
 };
 
+// Response of GET /api/exams/history
 export type GetExamsHistoryResponse = {
   attempts: ExamHistoryItem[];
+};
+
+// Response of GET /api/exams/in-progress
+export type GetInProgressExamResponse = {
+  attemptId: string | null;
 };

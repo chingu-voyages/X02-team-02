@@ -4,12 +4,17 @@ import {
   startExamRequestSchema,
   attemptIdSchema,
   saveAnswerRequestSchema,
+  categorySchema,
+} from "@x02/shared";
+import type {
+  ExamQuestion,
+  SubmitExamResponse,
   ExamResultQuestion,
   GetExamResultResponse,
   ExamHistoryItem,
   GetExamsHistoryResponse,
+  GetInProgressExamResponse,
 } from "@x02/shared";
-import type { ExamQuestion, SubmitExamResponse } from "@x02/shared";
 import { shuffle, parseStoredQuestion } from "../../utils/utils.js";
 import type {
   AttemptQuestion,
@@ -634,5 +639,59 @@ export async function getExamsHistory(
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Unable to load past attempts." });
+  }
+}
+
+// check if exam is in progress to display correct message on exam intro page
+export async function getInProgressExam(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot take exams.",
+    });
+    return;
+  }
+
+  const category = categorySchema.safeParse(req.query.category);
+
+  if (!category.success) {
+    res.status(400).json({
+      error: "Invalid category.",
+      fieldErrors: [
+        {
+          field: "category",
+          message: "Invalid category.",
+        },
+      ],
+    });
+    return;
+  }
+
+  try {
+    const existingAttempt = await prisma.attempt.findFirst({
+      where: {
+        category: category.data,
+        userId: user.id,
+        finishedAt: null,
+      },
+      select: { id: true },
+    });
+
+    const response: GetInProgressExamResponse = {
+      attemptId: existingAttempt?.id ?? null,
+    };
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Unable to check for an exam in progress." });
   }
 }
