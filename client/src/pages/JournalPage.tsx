@@ -100,7 +100,7 @@ export default function JournalPage() {
               </div>
             )}
           </div>
-          <div className="md:col-span-2 md:max-h-[calc(100vh-12rem)] md:overflow-y-auto md:pr-2">
+          <div className="md:col-span-2 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:pr-2">
             <h3 className="text-lg font-semibold outline-none mb-2">
               Past attempts
             </h3>
@@ -115,11 +115,14 @@ export default function JournalPage() {
             )}
             {attempts.length > 0 && filteredAttempts.length > 0 && (
               <table className="w-full border-separate border-spacing-y-2 text-left">
-                <thead className="sr-only">
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Score</th>
+                <thead>
+                  <tr className="text-sm text-fg-muted">
+                    <th className="px-4 pb-1 font-normal">Date</th>
+                    <th className="px-4 pb-1 font-normal">Category</th>
+                    <th className="px-4 pb-1 font-normal">Score</th>
+                    <th className="px-4 pb-1">
+                      <span className="sr-only">View details</span>
+                    </th>
                   </tr>
                 </thead>
 
@@ -144,10 +147,17 @@ export default function JournalPage() {
                             className="after:absolute after:inset-0"
                           >
                             {a.category}
+                            <span className="sr-only">
+                              , taken {formattedDate}, score{" "}
+                              {scorePercent(a.score, a.total)} percent
+                            </span>
                           </Link>
                         </td>
+                        <td className="cell whitespace-nowrap group-hover:bg-line group-focus-within:bg-line">
+                          {scorePercent(a.score, a.total)}%
+                        </td>
                         <td className="cell whitespace-nowrap text-right group-hover:bg-line group-focus-within:bg-line">
-                          {scorePercent(a.score, a.total)}% &gt;
+                          <span aria-hidden="true">&gt;</span>
                         </td>
                       </tr>
                     );

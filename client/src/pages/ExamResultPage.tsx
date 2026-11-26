@@ -4,6 +4,7 @@ import { getExamResult } from "../api/exams";
 import type { GetExamResultResponse } from "@x02/shared";
 import { ApiError } from "../api/client";
 import QuestionResultCard from "../components/QuestionResultCard";
+import { scorePercent } from "../utils/utils";
 
 type Status = "loading" | "error" | "ready";
 
@@ -49,42 +50,77 @@ export default function ExamResultPage() {
   }, [status]);
 
   return (
-    <section className="mx-auto max-w-2xl">
+    <section>
       {status === "loading" && <p role="status">Loading results...</p>}
       {status === "error" && <p role="alert">{message}</p>}
       {status === "ready" && result && (
-        <>
-          <h2
-            ref={headingRef}
-            tabIndex={-1}
-            className="text-xl font-semibold outline-none"
-          >
-            You got {result.score} out of {result.total}
-          </h2>
-          <ol className="mt-4 space-y-4">
-            {result.results.map((q) => (
-              <QuestionResultCard
-                key={q.id}
-                position={q.position}
-                text={q.text}
-                isCorrect={q.isCorrect}
-                yourAnswer={q.yourAnswer}
-                correctAnswer={q.correctAnswer}
-              />
-            ))}
-          </ol>
-          <div className="mt-8 flex align-center gap-3">
-            <Link
-              to={`/exams/${encodeURIComponent(result.category)}/start`}
-              className="btn-primary text-center"
-            >
-              Retake the exam
-            </Link>
-            <Link to="/exams" className="btn-neutral">
-              Back to exams
-            </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-1 flex gap-6 md:flex-col">
+            {/* Score card */}
+            <div className="w-50 max-w-[45%] md:w-full md:max-w-full bg-surface border border-line rounded-lg p-6 flex flex-col items-center gap-2">
+              <h2
+                className="text-fg-muted outline-none"
+                ref={headingRef}
+                tabIndex={-1}
+              >
+                Your score
+              </h2>
+              <span className="text-2xl font-medium text-fg">
+                {result.score} / {result.total}
+              </span>
+              <span className="text-fg-muted">
+                {scorePercent(result.score, result.total)}%
+              </span>
+            </div>
+
+            {/* Attempt details */}
+            <div className="self-center md:self-auto">
+              <p>Category: {result.category}</p>
+              <p>
+                Date:{" "}
+                {new Date(result.finishedAt).toLocaleString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                })}
+                ,{" "}
+                {new Date(result.finishedAt).toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
           </div>
-        </>
+
+          <div className="md:col-span-2 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:pr-2">
+            <h3 className="text-lg font-semibold outline-none mb-2">
+              Review your answers
+            </h3>
+
+            <ol className="mt-4 space-y-4">
+              {result.results.map((q) => (
+                <QuestionResultCard
+                  key={q.id}
+                  position={q.position}
+                  text={q.text}
+                  isCorrect={q.isCorrect}
+                  yourAnswer={q.yourAnswer}
+                  correctAnswer={q.correctAnswer}
+                />
+              ))}
+            </ol>
+            <div className="mt-8 flex align-center gap-3">
+              <Link
+                to={`/exams/${encodeURIComponent(result.category)}/start`}
+                className="btn-primary text-center"
+              >
+                Retake the exam
+              </Link>
+              <Link to="/exams" className="btn-neutral">
+                Back to exams
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );
