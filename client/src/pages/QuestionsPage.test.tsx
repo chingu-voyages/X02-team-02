@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AdminQuestionsPage from "./AdminQuestionsPage";
+import QuestionsPage from "./QuestionsPage";
 import { getQuestions } from "../api/questions";
-import type { LoadQuestionsResponse } from "../api/questions";
+import type { LoadQuestionsResponse } from "@x02/shared";
 
 vi.mock("../api/questions.ts", () => ({ getQuestions: vi.fn() }));
 const mockGetQuestions = vi.mocked(getQuestions);
@@ -39,7 +39,7 @@ const data: LoadQuestionsResponse = {
   ],
 };
 
-describe("AdminQuestionsPage", () => {
+describe("QuestionsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -48,7 +48,7 @@ describe("AdminQuestionsPage", () => {
     mockGetQuestions.mockResolvedValue(data);
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -67,7 +67,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -108,7 +108,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -143,7 +143,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -164,7 +164,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -180,7 +180,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 

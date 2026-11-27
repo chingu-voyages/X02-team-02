@@ -51,7 +51,13 @@ export type ValidationErrorResponse = ErrorResponse & {
 
 export { createQuestionSchema } from "./schemas/question.js";
 
-export type { CreateQuestionInput } from "./schemas/question.js";
+export type {
+  CreateQuestionInput,
+  QuestionReviewStatus,
+  CreateQuestionResponse,
+  LoadedQuestion,
+  LoadQuestionsResponse,
+} from "./schemas/question.js";
 
 export { practiceGradeRequestSchema } from "./practice.js";
 

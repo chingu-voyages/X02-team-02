@@ -3,7 +3,7 @@ import { AuthProvider } from "./auth/AuthProvider.tsx";
 import { RequireAuth } from "./auth/RequireAuth.tsx";
 import { RequireRole } from "./auth/RequireRole.tsx";
 import Layout from "./pages/Layout.tsx";
-import AdminQuestionsPage from "./pages/AdminQuestionsPage.tsx";
+import QuestionsPage from "./pages/QuestionsPage.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
@@ -37,15 +37,17 @@ export default function App() {
             {/* All admin routes require authentication and ADMIN role. */}
             <Route element={<RequireRole allowedRoles={["ADMIN"]} />}>
               <Route path="/admin" element={<Layout />}>
-                <Route path="questions" element={<AdminQuestionsPage />} />
-                <Route path="questions/new" element={<NewQuestionPage />} />
+                // TODO: here goes question editing page - only accessible to
+                admins
               </Route>
             </Route>
 
-            {/* Learner routes */}
+            {/* Learner and Learner/Admin routes */}
             <Route element={<Layout />}>
               <Route path="/exams" element={<ExamCategoriesPage />} />
               <Route path="/journal" element={<JournalPage />} />
+              <Route path="/questions" element={<QuestionsPage />} />
+              <Route path="/questions/new" element={<NewQuestionPage />} />
               <Route
                 path="/exams/:category/start"
                 element={<ExamIntroPage />}

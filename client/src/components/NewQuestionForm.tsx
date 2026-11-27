@@ -69,7 +69,7 @@ export default function NewQuestionForm() {
 
     try {
       await createQuestion(request);
-      navigate("/admin/questions");
+      navigate("/questions");
     } catch (error) {
       if (error instanceof ApiError) {
         // input field error
@@ -108,7 +108,7 @@ export default function NewQuestionForm() {
   };
 
   function onCancel() {
-    navigate("/admin/questions");
+    navigate("/questions");
   }
 
   return (

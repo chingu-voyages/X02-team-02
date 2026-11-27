@@ -29,8 +29,8 @@ export default function LoginForm() {
       await login(request);
       // TODO: navigate to different route later
       if (user?.role === "LEARNER") {
-        navigate("/");
-      } else navigate("/admin/questions");
+        navigate("/journal");
+      } else navigate("/questions");
     } catch (error) {
       console.log(error);
       if (error instanceof ApiError) {

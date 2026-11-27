@@ -4,13 +4,7 @@ const questionTextSchema = z.string().trim().min(1).max(5_000);
 
 const categorySchema = z.string().trim().min(1).max(100);
 
-const difficultySchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(50)
-  .optional();
-
+const difficultySchema = z.string().trim().min(1).max(50).optional();
 
 // MULTIPLE_CHOICE
 
@@ -19,10 +13,12 @@ const multipleChoiceContentSchema = z
     text: questionTextSchema,
     options: z
       .array(
-        z.object({
-          id: z.string().trim().min(1).max(50),
-          text: z.string().trim().min(1).max(1_000),
-        }).strict(),
+        z
+          .object({
+            id: z.string().trim().min(1).max(50),
+            text: z.string().trim().min(1).max(1_000),
+          })
+          .strict(),
       )
       .min(2)
       .max(10),
@@ -82,7 +78,6 @@ const multipleChoiceQuestionSchema = z
     }
   });
 
-
 // SHORT_ANSWER
 
 const shortAnswerContentSchema = z
@@ -110,7 +105,6 @@ const shortAnswerQuestionSchema = z
   })
   .strict();
 
-
 // ESSAY
 
 const essayContentSchema = z
@@ -135,7 +129,6 @@ const essayQuestionSchema = z
   })
   .strict();
 
-
 export const createQuestionSchema = z.discriminatedUnion("answerType", [
   multipleChoiceQuestionSchema,
   shortAnswerQuestionSchema,
@@ -143,3 +136,37 @@ export const createQuestionSchema = z.discriminatedUnion("answerType", [
 ]);
 
 export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
+
+export type QuestionReviewStatus =
+  "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "FLAGGED";
+
+// TODO: add options to content when the detail page is built
+type CreatedQuestion = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  answerType: "MULTIPLE_CHOICE" | "SHORT_ANSWER" | "ESSAY";
+  content: { text: string };
+  category: string;
+  difficulty: string | null;
+  reviewStatus: QuestionReviewStatus;
+  authorId: string;
+};
+
+export type CreateQuestionResponse = {
+  message: string;
+  question: CreatedQuestion;
+};
+
+// TODO: add options to content when the detail page is built
+export type LoadedQuestion = CreatedQuestion & { author: { username: string } };
+
+export type LoadQuestionsResponse = {
+  questions: LoadedQuestion[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
