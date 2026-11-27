@@ -20,12 +20,12 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 
 ## Tech Stack
 
-| Layer                   | Technology                              | Notes                                                                 |
-| :---------------------- | :-------------------------------------- | :-------------------------------------------------------------------- |
-| **Frontend**            | React 19, Vite, TypeScript | Dev server on port 5173 |
-| **Backend** | Node.js, Express      | API on port 3000, health check at `/health` |
-| **Database** | PostgreSQL (Docker), Prisma     | PostgreSQL runs in Docker |
-| **Tooling** | pnpm workspaces     | Monorepo: `client`, `server`, `shared` |
+| Layer | Technology | Notes |
+| :- | :- | :- |
+| **Frontend** | React 19, Vite, TypeScript | Dev server on port 5173 |
+| **Backend** | Node.js, Express | API on port 3000, health check at `/health` |
+| **Database** | PostgreSQL (Docker), Prisma | PostgreSQL runs in Docker |
+| **Tooling** | pnpm workspaces | Monorepo: `client`, `server`, `shared` |
 | **Auth** | WIP |  |
 
 ---
@@ -35,7 +35,7 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 - [Node.js](https://nodejs.org/) 22 or newer
 - [pnpm](https://pnpm.io/installation)
 - [Docker](https://docs.docker.com/get-docker/) with Docker Compose v2 (`docker compose` command). [Docker Desktop](https://www.docker.com/products/docker-desktop/) is the easiest option on macOS and Windows.
-  Make sure Docker is running before you start the database.
+- Make sure Docker is running before you start the database.
 
 ---
 
@@ -44,33 +44,33 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 1. **Clone & enter the repo:**
 
 ```bash
-   git clone https://github.com/chingu-voyages/X02-team-02.git
-   cd X02-team-02
+git clone https://github.com/chingu-voyages/X02-team-02.git
+cd X02-team-02
 ```
 
 2. **Install dependencies:**
 
 ```bash
-   pnpm install
+pnpm install
 ```
 
 3. **Create your local environment file:**
 
 ```bash
-   cp .env.example .env
+cp .env.example .env
 ```
 
 4. **Start the database, server and client** (make sure Docker is running first):
 
 ```bash
-   docker compose up -d build
+docker compose up -d --build
 ```
 
-5. **Set up the database tables and the Prisma client** (migrations are not run automatically):
+5. **Set up the database tables and the Prisma client** (migrations are not run automatically), inside Docker:
 
 ```bash
-   pnpm --filter @x02/server exec prisma migrate dev
-   pnpm --filter @x02/server exec prisma generate
+docker compose exec server pnpm --filter @x02/server exec prisma migrate dev
+docker compose exec server pnpm --filter @x02/server exec prisma generate
 ```
 
 6. **Open the app:**
@@ -80,15 +80,35 @@ An open-source quiz engine that helps community members practice for Scrum Maste
 
 ---
 
-## Seed sample questions
+## Seed the first admin account
 
-Load 30 sample Scrum questions so the question list, and soon the practice quiz, have content to work with. Run this after the database migrations:
+Configure the initial admin credentials in the repository-root `.env` file:
 
-```bash
-pnpm --filter @x02/server seed
+```dotenv
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-this-password
 ```
 
-Inside Docker, use:
+Use a strong, private password and do not commit your `.env` file.
+
+After running the database migrations, create the first admin account, inside Docker:
+
+```bash
+docker compose exec server pnpm --filter @x02/server seed:admin
+```
+
+- The username is derived from the part of `ADMIN_EMAIL` before the `@` symbol.
+- The password is hashed using the application's Argon2id password helper.
+- The account is created with the `ADMIN` role and `ACTIVE` status.
+- If an admin account already exists, the script makes no changes.
+- If the configured email or derived username is already assigned to another account, the script reports an error rather than modifying that account.
+- The script does not print or store the configured password.
+
+---
+
+## Seed sample questions
+
+Load 30 sample Scrum questions so the question list, and soon the practice quiz, have content to work with. Run this after the database migrations, inside Docker:
 
 ```bash
 docker compose exec server pnpm --filter @x02/server seed
@@ -159,10 +179,10 @@ WIP
 
 ## Our Team
 
-| Name                       | Role          | Links                                                                                                     |
-| :------------------------- | :------------ | :-------------------------------------------------------------------------------------------------------- |
-| **Adewale Agboke**         | Scrum Master  | [GitHub](https://github.com/Adewal246) / [LinkedIn](https://linkedin.com/in/adewaleagboke/)               |
-| **Tunde Ademola Kujore**   | Product Owner | [GitHub](https://github.com/dhemmyhardy) / [LinkedIn](https://www.linkedin.com/in/tundeademolakujore/)    |
-| **Dustin Hoeppner**        | Web Developer | [GitHub](https://github.com/dhoepp) / [LinkedIn](https://linkedin.com/in/dustin-hoeppner)                 |
-| **William Barus**          | Web Developer | [GitHub](https://github.com/maki-keep) / [LinkedIn](https://www.linkedin.com/in/william-barus-3821a8234/) |
-| **Eva Langerova**          | Web Developer | [GitHub](https://github.com/eva-lng) / [LinkedIn](https://www.linkedin.com/in/eva-langerova-61059027a/)   |
+| Name | Role | Links |
+| :- | :- | :- |
+| **Adewale Agboke** | Scrum Master | [GitHub](https://github.com/Adewal246) / [LinkedIn](https://linkedin.com/in/adewaleagboke/) |
+| **Tunde Ademola Kujore** | Product Owner | [GitHub](https://github.com/dhemmyhardy) / [LinkedIn](https://www.linkedin.com/in/tundeademolakujore/) |
+| **Dustin Hoeppner** | Web Developer | [GitHub](https://github.com/dhoepp) / [LinkedIn](https://linkedin.com/in/dustin-hoeppner) |
+| **William Barus** | Web Developer | [GitHub](https://github.com/maki-keep) / [LinkedIn](https://www.linkedin.com/in/william-barus-3821a8234/) |
+| **Eva Langerova** | Web Developer | [GitHub](https://github.com/eva-lng) / [LinkedIn](https://www.linkedin.com/in/eva-langerova-61059027a/) |
