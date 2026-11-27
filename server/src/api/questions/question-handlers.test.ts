@@ -32,18 +32,26 @@ const validQuestion = {
 
 const activeUser = {
   id: "00000000-0000-0000-0000-000000000001",
+  role: "LEARNER" as const,
+  status: "ACTIVE" as const,
+};
+
+const adminUser = {
+  id: "00000000-0000-0000-0000-000000000004",
+  role: "ADMIN" as const,
   status: "ACTIVE" as const,
 };
 
 const blockedUser = {
   id: "00000000-0000-0000-0000-000000000002",
+  role: "LEARNER" as const,
   status: "BLOCKED" as const,
 };
 
 function createMocks(
   options: {
     body?: unknown;
-    user?: typeof activeUser | typeof blockedUser;
+    user?: typeof activeUser | typeof blockedUser | typeof adminUser;
   } = {},
 ) {
   const req = {
@@ -168,9 +176,7 @@ describe("Question handlers", () => {
     });
 
     it("returns 500 when an unexpected database error occurs", async () => {
-      mockCreate.mockRejectedValue(
-        new Error("Database connection failed"),
-      );
+      mockCreate.mockRejectedValue(new Error("Database connection failed"));
 
       const consoleError = vi
         .spyOn(console, "error")
@@ -191,7 +197,7 @@ describe("Question handlers", () => {
   });
 
   describe("loadQuestions", () => {
-    it("returns approved questions with default pagination", async () => {
+    it("returns learner's own questions with default pagination", async () => {
       const questions = [
         {
           id: "00000000-0000-0000-0000-000000000003",
@@ -201,14 +207,14 @@ describe("Question handlers", () => {
           difficulty: validQuestion.difficulty,
         },
       ];
-  
+
       mockFindMany.mockResolvedValue(questions);
       mockCount.mockResolvedValue(1);
-  
+
       const { req, res } = createMocks();
-  
+
       await loadQuestions(req, res);
-  
+
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         questions,
@@ -219,13 +225,10 @@ describe("Question handlers", () => {
           totalPages: 1,
         },
       });
-  
+
       expect(mockFindMany).toHaveBeenCalledWith({
-        where: { reviewStatus: "APPROVED" },
-        orderBy: [
-          { createdAt: "desc" },
-          { id: "asc" },
-        ],
+        where: { authorId: activeUser.id },
+        orderBy: [{ createdAt: "desc" }, { id: "asc" }],
         skip: 0,
         take: 20,
         select: {
@@ -236,36 +239,80 @@ describe("Question handlers", () => {
           content: true,
           category: true,
           difficulty: true,
+          reviewStatus: true,
+          authorId: true,
+          author: { select: { username: true } },
         },
       });
-  
+
       expect(mockCount).toHaveBeenCalledWith({
-        where: { reviewStatus: "APPROVED" },
+        where: { authorId: activeUser.id },
       });
-  
+
       expect(questions[0]).not.toHaveProperty("answerKey");
     });
-  
+
+    it("returns all questions for an admin without filtering by author", async () => {
+      mockFindMany.mockResolvedValue([]);
+      mockCount.mockResolvedValue(0);
+
+      const { req, res } = createMocks({ user: adminUser });
+
+      await loadQuestions(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: {} }),
+      );
+      expect(mockCount).toHaveBeenCalledWith({ where: {} });
+    });
+
+    it("returns 401 when the user is not authenticated", async () => {
+      const { req, res } = createMocks({ user: undefined });
+
+      await loadQuestions(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Authentication required.",
+      });
+      expect(mockFindMany).not.toHaveBeenCalled();
+      expect(mockCount).not.toHaveBeenCalled();
+    });
+
+    it("returns 403 when the user account is blocked", async () => {
+      const { req, res } = createMocks({ user: blockedUser });
+
+      await loadQuestions(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        error: "Blocked users cannot view questions.",
+      });
+      expect(mockFindMany).not.toHaveBeenCalled();
+      expect(mockCount).not.toHaveBeenCalled();
+    });
+
     it("uses the requested pagination parameters", async () => {
       mockFindMany.mockResolvedValue([]);
       mockCount.mockResolvedValue(45);
-  
+
       const { req, res } = createMocks();
-  
+
       req.query = {
         page: "2",
         limit: "10",
       };
-  
+
       await loadQuestions(req, res);
-  
+
       expect(mockFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           skip: 10,
           take: 10,
         }),
       );
-  
+
       expect(res.json).toHaveBeenCalledWith({
         questions: [],
         pagination: {
@@ -276,30 +323,30 @@ describe("Question handlers", () => {
         },
       });
     });
-  
+
     it("returns 400 for invalid pagination parameters", async () => {
       const { req, res } = createMocks();
-  
+
       req.query = {
         page: "0",
         limit: "101",
       };
-  
+
       await loadQuestions(req, res);
-  
+
       expect(res.status).toHaveBeenCalledWith(400);
       expect(mockFindMany).not.toHaveBeenCalled();
       expect(mockCount).not.toHaveBeenCalled();
     });
-  
+
     it("returns 200 with an empty result when no questions are approved", async () => {
       mockFindMany.mockResolvedValue([]);
       mockCount.mockResolvedValue(0);
-  
+
       const { req, res } = createMocks();
-  
+
       await loadQuestions(req, res);
-  
+
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         questions: [],
@@ -311,25 +358,23 @@ describe("Question handlers", () => {
         },
       });
     });
-  
+
     it("returns 500 when the database query fails", async () => {
-      mockFindMany.mockRejectedValue(
-        new Error("Database connection failed"),
-      );
-  
+      mockFindMany.mockRejectedValue(new Error("Database connection failed"));
+
       const consoleError = vi
         .spyOn(console, "error")
         .mockImplementation(() => {});
-  
+
       const { req, res } = createMocks();
-  
+
       await loadQuestions(req, res);
-  
+
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         message: "An error occurred while loading questions.",
       });
-  
+
       consoleError.mockRestore();
     });
   });
