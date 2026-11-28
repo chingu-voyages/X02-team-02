@@ -42,7 +42,7 @@ export default function RegisterForm() {
       await registerUser(request);
       // TODO: set up login after register on BE, navigate to a different route later
       await login({ email: data.email, password: data.password });
-      navigate("/admin/questions");
+      navigate("/questions");
     } catch (error) {
       if (error instanceof ApiError) {
         // input field error

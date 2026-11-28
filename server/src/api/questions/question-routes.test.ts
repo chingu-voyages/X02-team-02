@@ -5,15 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { attachUser } from "../auth/session-middleware.js";
 import questionRoutes from "./question-routes.js";
 
-const {
-  mockGetSessionUser,
-  mockCreateQuestion,
-  mockLoadQuestions,
-} = vi.hoisted(() => ({
-  mockGetSessionUser: vi.fn(),
-  mockCreateQuestion: vi.fn(),
-  mockLoadQuestions: vi.fn(),
-}));
+const { mockGetSessionUser, mockCreateQuestion, mockLoadQuestions } =
+  vi.hoisted(() => ({
+    mockGetSessionUser: vi.fn(),
+    mockCreateQuestion: vi.fn(),
+    mockLoadQuestions: vi.fn(),
+  }));
 
 vi.mock("../auth/session.js", () => ({
   getSessionUser: mockGetSessionUser,
@@ -86,32 +83,15 @@ describe("Question routes", () => {
     it.each([
       ["LEARNER", users.LEARNER],
       ["QUESTION_MANAGER", users.QUESTION_MANAGER],
-    ] as const)(
-      "returns 403 for %s",
-      async (_role, user) => {
-        mockGetSessionUser.mockResolvedValue(user);
-
-        const response = await request(buildApp())
-          .get("/api/questions")
-          .set("Cookie", "sid=valid-session");
-
-        expect(response.status).toBe(403);
-        expect(response.body).toEqual({
-          error: "Forbidden.",
-        });
-        expect(mockLoadQuestions).not.toHaveBeenCalled();
-      },
-    );
-
-    it("allows ADMIN to retrieve questions", async () => {
-      mockGetSessionUser.mockResolvedValue(users.ADMIN);
+      ["ADMIN", users.ADMIN],
+    ] as const)("allows %s to reach the handler", async (_role, user) => {
+      mockGetSessionUser.mockResolvedValue(user);
 
       const response = await request(buildApp())
         .get("/api/questions")
         .set("Cookie", "sid=valid-session");
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ questions: [] });
       expect(mockLoadQuestions).toHaveBeenCalledOnce();
     });
   });
@@ -130,19 +110,16 @@ describe("Question routes", () => {
       ["LEARNER", users.LEARNER],
       ["QUESTION_MANAGER", users.QUESTION_MANAGER],
       ["ADMIN", users.ADMIN],
-    ] as const)(
-      "allows %s to submit a question",
-      async (_role, user) => {
-        mockGetSessionUser.mockResolvedValue(user);
+    ] as const)("allows %s to submit a question", async (_role, user) => {
+      mockGetSessionUser.mockResolvedValue(user);
 
-        const response = await request(buildApp())
-          .post("/api/questions/create")
-          .set("Cookie", "sid=valid-session")
-          .send({});
+      const response = await request(buildApp())
+        .post("/api/questions/create")
+        .set("Cookie", "sid=valid-session")
+        .send({});
 
-        expect(response.status).toBe(201);
-        expect(mockCreateQuestion).toHaveBeenCalledOnce();
-      },
-    );
+      expect(response.status).toBe(201);
+      expect(mockCreateQuestion).toHaveBeenCalledOnce();
+    });
   });
 });

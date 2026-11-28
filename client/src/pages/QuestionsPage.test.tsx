@@ -2,12 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AdminQuestionsPage from "./AdminQuestionsPage";
+import QuestionsPage from "./QuestionsPage";
 import { getQuestions } from "../api/questions";
-import type { LoadQuestionsResponse } from "../api/questions";
+import type { LoadQuestionsResponse } from "@x02/shared";
 
 vi.mock("../api/questions.ts", () => ({ getQuestions: vi.fn() }));
 const mockGetQuestions = vi.mocked(getQuestions);
+const mockUseAuth = vi.hoisted(() => vi.fn());
+vi.mock("../auth/useAuth.ts", () => ({ useAuth: mockUseAuth }));
 
 const data: LoadQuestionsResponse = {
   pagination: { page: 1, limit: 20, total: 2, totalPages: 1 },
@@ -24,6 +26,7 @@ const data: LoadQuestionsResponse = {
       reviewStatus: "PENDING",
       difficulty: null,
       authorId: "user1",
+      author: { username: "name1" },
     },
     {
       id: "21111111-1111-1111-1111-111111111111",
@@ -35,20 +38,25 @@ const data: LoadQuestionsResponse = {
       reviewStatus: "APPROVED",
       difficulty: null,
       authorId: "user1",
+      author: { username: "name1" },
     },
   ],
 };
 
-describe("AdminQuestionsPage", () => {
+describe("QuestionsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockUseAuth.mockReturnValue({
+      user: { id: "admin-1", role: "ADMIN" },
+      status: "authenticated",
+    });
   });
 
   it("shows loading, then the questions", async () => {
     mockGetQuestions.mockResolvedValue(data);
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -67,7 +75,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -108,7 +116,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -143,7 +151,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -164,7 +172,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -180,7 +188,7 @@ describe("AdminQuestionsPage", () => {
 
     render(
       <MemoryRouter>
-        <AdminQuestionsPage />
+        <QuestionsPage />
       </MemoryRouter>,
     );
 
@@ -191,5 +199,45 @@ describe("AdminQuestionsPage", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByText("Loading questions...")).not.toBeInTheDocument();
     expect(screen.queryByText(/no .*questions/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the learner view: own heading, All filter, date column, no admin parts", async () => {
+    mockUseAuth.mockReturnValue({
+      user: { id: "learner-1", role: "LEARNER" },
+      status: "authenticated",
+    });
+    mockGetQuestions.mockResolvedValue(data);
+
+    render(
+      <MemoryRouter>
+        <QuestionsPage />
+      </MemoryRouter>,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "My questions" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(
+      screen.getByText(
+        "Who is responsible for maximizing the value of the product?",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("How long is a Sprint at most?"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("columnheader", { name: "Submitted on" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Submitted by")).not.toBeInTheDocument();
+    expect(screen.queryByText("maria")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /review|edit/i }),
+    ).not.toBeInTheDocument();
   });
 });

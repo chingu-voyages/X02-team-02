@@ -77,6 +77,20 @@ export async function loadQuestions(
   req: Request,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Authentication required." });
+    return;
+  }
+
+  const user = req.user;
+
+  if (user.status === "BLOCKED") {
+    res.status(403).json({
+      error: "Blocked users cannot view questions.",
+    });
+    return;
+  }
+
   const DEFAULT_PAGE = 1;
   const DEFAULT_LIMIT = 20;
   const MAX_LIMIT = 100;
@@ -122,14 +136,12 @@ export async function loadQuestions(
   }
 
   const skip = (page - 1) * limit;
+  const where = user.role === "ADMIN" ? {} : { authorId: user.id };
 
   try {
     const [questions, total] = await Promise.all([
       prisma.question.findMany({
-        // TODO: temporary change for /admin/questions page
-        // where: {
-        //   reviewStatus: "APPROVED",
-        // },
+        where,
         orderBy: [{ createdAt: "desc" }, { id: "asc" }],
         skip,
         take: limit,
@@ -141,14 +153,12 @@ export async function loadQuestions(
           content: true,
           category: true,
           difficulty: true,
-          reviewStatus: true, // TODO: temporary change for /admin/questions page
-          authorId: true, // TODO: temporary change for /admin/questions page
+          reviewStatus: true,
+          authorId: true,
+          author: { select: { username: true } },
         },
       }),
-      prisma.question.count(
-        // TODO: temporary change for /admin/questions page
-        // { where: { reviewStatus: "APPROVED" } }
-      ),
+      prisma.question.count({ where }),
     ]);
 
     res.status(200).json({

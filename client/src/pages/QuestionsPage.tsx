@@ -1,7 +1,8 @@
 import { Link } from "react-router";
 import { useState, useEffect } from "react";
 import { getQuestions } from "../api/questions.ts";
-import type { LoadedQuestion, QuestionReviewStatus } from "../api/questions.ts";
+import type { LoadedQuestion, QuestionReviewStatus } from "@x02/shared";
+import { useAuth } from "../auth/useAuth.ts";
 
 type StatusFilter = QuestionReviewStatus | "ALL";
 
@@ -31,8 +32,13 @@ const statusStyles: Record<QuestionReviewStatus, string> = {
 
 // TODO: pagination
 
-export default function AdminQuestionsPage() {
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("PENDING");
+export default function QuestionsPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    isAdmin ? "PENDING" : "ALL",
+  );
   const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +76,9 @@ export default function AdminQuestionsPage() {
 
   return (
     <section>
-      <h2 className="mb-4 text-xl font-semibold">Questions</h2>
+      <h2 className="mb-4 text-xl font-semibold">
+        {isAdmin ? "Questions" : "My questions"}
+      </h2>
 
       <div className="mb-6 flex flex-wrap justify-between items-center gap-3">
         <div
@@ -96,10 +104,7 @@ export default function AdminQuestionsPage() {
           ))}
         </div>
 
-        <Link
-          to="/admin/questions/new"
-          className="btn-secondary text-sm focus-ring"
-        >
+        <Link to="/questions/new" className="btn-secondary text-sm focus-ring">
           + New Question
         </Link>
       </div>
@@ -124,11 +129,13 @@ export default function AdminQuestionsPage() {
                 </th>
                 <th className="px-4 pb-1 font-normal">Status</th>
                 <th className="hidden px-4 pb-1 font-normal md:table-cell">
-                  Submitted by
+                  {isAdmin ? "Submitted by" : "Submitted on"}
                 </th>
-                <th className="px-4 pb-1">
-                  <span className="sr-only">Actions</span>
-                </th>
+                {isAdmin && (
+                  <th className="px-4 pb-1">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -148,17 +155,26 @@ export default function AdminQuestionsPage() {
                     </span>
                   </td>
                   <td className="cell hidden md:table-cell">
-                    {question.authorId}
+                    {isAdmin
+                      ? question.author.username
+                      : new Date(question.createdAt).toLocaleString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                        })}
                   </td>
-                  <td className="cell text-right">
-                    <Link
-                      to={`/admin/questions/${question.id}`}
-                      className="text-fg-muted hover:text-fg focus-ring"
-                    >
-                      {question.reviewStatus === "PENDING" ? "Review" : "Edit"}{" "}
-                      &gt;
-                    </Link>
-                  </td>
+                  {isAdmin && (
+                    <td className="cell text-right">
+                      <Link
+                        to={`/admin/questions/${question.id}`}
+                        className="text-fg-muted hover:text-fg focus-ring"
+                      >
+                        {question.reviewStatus === "PENDING"
+                          ? "Review"
+                          : "Edit"}{" "}
+                        &gt;
+                      </Link>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
